@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Earning Pro V2 - Premium Earning App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --bg-color: #f4f7fe; --text-color: #2b3674; --card-bg: #ffffff;
+            --primary: #4318ff; --primary-hover: #3311cc; --nav-bg: #ffffff;
+            --border: #e0e5f2; --danger: #ee5d50; --warning: #ffb648;
+            --info: #1e90ff; --success: #05cd99; --coin-color: #f1c40f;
+            --shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        body.dark-mode {
+            --bg-color: #111c44; --text-color: #ffffff; --card-bg: #1b2559;
+            --nav-bg: #1b2559; --border: #2b3674; --shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent;}
+        body { background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; overflow: hidden; }
+        
+        .app-container { width: 100%; max-width: 480px; height: 100vh; background-color: var(--bg-color); position: relative; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        
+        #splash-screen { position: absolute; inset: 0; background: linear-gradient(135deg, var(--primary), var(--info)); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; color: white; transition: 0.5s; }
+        #splash-screen i { font-size: 70px; margin-bottom: 20px; animation: bounce 2s infinite; text-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+        #auth-page { display: none; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 25px; overflow-y: auto; background: var(--bg-color); }
+        .auth-box { background: var(--card-bg); padding: 35px 25px; border-radius: 24px; width: 100%; box-shadow: var(--shadow); text-align: center; border: 1px solid var(--border); animation: slideUp 0.5s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .input-group { position: relative; margin-bottom: 16px; text-align: left; }
+        .input-group i.fa-solid { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #a3aed1; font-size: 18px; }
+        .input-group input { width: 100%; padding: 15px 15px 15px 45px; border: 2px solid var(--border); border-radius: 14px; background: transparent; color: var(--text-color); font-size: 14px; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--primary); }
+        
+        button.btn-main { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--primary), var(--info)); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(67, 24, 255, 0.25); transition: transform 0.2s; margin-top: 5px;}
+        button.btn-main:active { transform: scale(0.97); }
+        .auth-link { margin-top: 15px; font-size: 14px; color: var(--info); cursor: pointer; font-weight: 500; }
+
+        .header { background: var(--card-bg); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; border-bottom: 1px solid var(--border); }
+        .header-left { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 15px; }
+        .header-left img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--primary); padding: 2px; }
+        .theme-btn { background: var(--border); width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--text-color); font-size: 15px; margin-left:8px;}
+        
+        .notice-bar { background: var(--warning); color: #fff; font-size: 13px; display: flex; align-items: center; padding: 10px 15px; z-index: 1; }
+        .notice-wrap { overflow: hidden; white-space: nowrap; width: 100%; }
+        .notice-content { display: inline-block; padding-left: 100%; animation: scrollText 20s linear infinite; font-weight: 500; }
+        @keyframes scrollText { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
+        .content-area::-webkit-scrollbar { display: none; }
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--card-bg); padding: 22px; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border); }
+        
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .feature-box { background: var(--card-bg); border: 1px solid var(--border); padding: 15px 5px; border-radius: 18px; text-align: center; cursor: pointer; font-weight: 600; display: flex; flex-direction: column; gap: 8px; box-shadow: var(--shadow); transition: transform 0.2s; font-size: 11px; }
+        .feature-box:active { transform: scale(0.95); }
+
+        .plan-badge-top { display: inline-block; background: rgba(5, 205, 153, 0.15); color: var(--success); padding: 6px 15px; font-size: 12px; font-weight: 700; border-radius: 20px; margin-bottom: 10px; border: 1px solid var(--success); }
+        .plan-badge-top.danger { background: rgba(238, 93, 80, 0.15); color: var(--danger); border-color: var(--danger); }
+
+        .balance-card { text-align: center; background: linear-gradient(135deg, var(--primary), var(--info)); color: white; padding: 25px 20px; border-radius: 24px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(67, 24, 255, 0.25); }
+        .balance-card p { font-size: 14px; opacity: 0.9; margin-bottom: 5px; }
+        .balance-card h1 { font-size: 40px; font-weight: 700; margin-bottom: 15px; letter-spacing: -1px; }
+        .coin-box { background: rgba(255,255,255,0.15); padding: 10px 20px; border-radius: 14px; display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; border: 1px solid rgba(255,255,255,0.2); }
+        
+        .game-banner { text-align: left; padding: 22px; border-radius: 20px; color: white; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); }
+        .limit-badge { font-size: 11px; font-weight: bold; color: var(--primary); background: rgba(255,255,255,0.95); padding: 6px 10px; border-radius: 8px; }
+        
+        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; margin-bottom: 15px; background: var(--card-bg); }
+        .btn-task { background: var(--info); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; }
+
+        .wallet-tabs { display: flex; background: var(--border); border-radius: 16px; margin-bottom: 20px; padding: 5px; }
+        .w-tab { flex: 1; text-align: center; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; color: #7f8c8d; transition: 0.3s; }
+        .w-tab.active { background: var(--card-bg); color: var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+        .pay-methods-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .pay-method-box { background: var(--bg-color); border: 2px solid var(--border); border-radius: 14px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.3s; color: var(--text-color); }
+        .pay-method-box.selected { border-color: var(--primary); background: rgba(67, 24, 255, 0.05); color: var(--primary); }
+        .pay-method-box.sel-dep { border-color: var(--info); background: rgba(30, 144, 255, 0.08); color: var(--info); }
+        
+        .form-group { margin-bottom: 18px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: #7f8c8d; }
+        .form-group input { width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-color); color: var(--text-color); font-size: 14px; outline: none; }
+        .form-group input:focus { border-color: var(--primary); }
+
+        .plan-item { background: linear-gradient(135deg, var(--card-bg), var(--bg-color)); border: 2px solid var(--primary); border-radius: 20px; padding: 20px; margin-bottom: 15px; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+        .plan-name { font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 5px; }
+        .plan-price { font-size: 28px; font-weight: 800; color: var(--text-color); margin-bottom: 15px; }
+
+        .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 12px 0 20px 0; border-top: 1px solid var(--border); z-index: 100; border-top-left-radius: 24px; border-top-right-radius: 24px; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); }
+        .nav-item { text-align: center; color: #a3aed1; cursor: pointer; width: 25%; transition: 0.3s; position: relative; }
+        .nav-item i { font-size: 22px; margin-bottom: 5px; display: block; transition: 0.3s; }
+        .nav-item span { font-size: 11px; font-weight: 600; transition: 0.3s; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active i { transform: translateY(-5px); font-size: 24px; }
+        .nav-item.active span { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="splash-screen">
+        <i class="fa-solid fa-gem"></i>
+        <h2 style="font-weight: 700; font-size: 28px;">Earning Pro V2</h2>
+        <p style="font-size: 13px; margin-top: 5px; opacity: 0.9;">Premium Platform</p>
+    </div>
+
+    <!-- AUTH PAGE -->
+    <div id="auth-page">
+        <div class="auth-box" id="login-section">
+            <div style="width: 80px; height: 80px; background: rgba(67, 24, 255, 0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; color: var(--primary);">
+                <i class="fa-solid fa-fingerprint" style="font-size: 40px;"></i>
+            </div>
+            <h2 style="margin-bottom: 25px; font-size: 24px;" data-i18n="login_title">Welcome Back!</h2>
+            <div class="input-group">
+                <i class="fa-solid fa-phone"></i>
+                <input type="number" id="login-phone" placeholder="Phone Number (11 Digits)" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <i class="fa-solid fa-eye" style="left:auto; right:15px; cursor:pointer;" onclick="togglePass('login-password')"></i>
+            </div>
+            <button class="btn-main" onclick="window.loginUser()"><i class="fa-solid fa-right-to-bracket"></i> <span data-i18n="login_btn">Login to Account</span></button>
+            <p class="auth-link" onclick="window.toggleAuth('signup')" data-i18n="go_signup">Create new account</p>
+        </div>
+
+        <div class="auth-box" id="signup-section" style="display: none;">
+            <div style="width: 80px; height: 80px; background: rgba(30, 144, 255, 0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; color: var(--info);">
+                <i class="fa-solid fa-user-plus" style="font-size: 35px;"></i>
+            </div>
+            <h2 style="margin-bottom: 25px; font-size: 24px;" data-i18n="signup_title">Create Account</h2>
+            <div class="input-group">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="reg-name" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-phone"></i>
+                <input type="number" id="reg-phone" placeholder="Phone Number (11 Digits)" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="reg-password" placeholder="Set Password (Min 8 Chars)" required>
+                <i class="fa-solid fa-eye" style="left:auto; right:15px; cursor:pointer;" onclick="togglePass('reg-password')"></i>
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-user-tag"></i>
+                <input type="number" id="reg-refer" placeholder="Referral Code (Optional)">
+            </div>
+            <button class="btn-main" style="background: linear-gradient(135deg, var(--info), #00a8ff);" onclick="window.startRegister()">
+                <span data-i18n="signup_btn">Register Now</span>
+            </button>
+            <p class="auth-link" onclick="window.toggleAuth('login')" data-i18n="go_login">Already have an account? Login</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app" style="display: none; height: 100%; flex-direction: column;">
+        <div class="header">
+            <div class="header-left">
+                <img src="" id="header-avatar" alt="Avatar">
+                <div>
+                    <div id="display-user" style="line-height: 1.2;">User</div>
+                    <div style="font-size: 11px; color: #7f8c8d; font-weight: 500;">Online</div>
+                </div>
+            </div>
+            <div style="display:flex;">
+                <div class="theme-btn" onclick="window.toggleLanguage()"><i class="fa-solid fa-language"></i></div>
+                <div class="theme-btn" onclick="window.toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></div>
+            </div>
+        </div>
+
+        <div class="notice-bar">
+            <i class="fa-solid fa-bullhorn notice-icon"></i>
+            <div class="notice-wrap"><div class="notice-content" id="dynamic-notice">Loading notice...</div></div>
+        </div>
+
+        <div class="content-area">
+            <!-- HOME TAB -->
+            <div id="sec-home" class="section active">
+                <div style="text-align: center;">
+                    <div class="plan-badge-top danger" id="ui-plan-badge"><i class="fa-solid fa-triangle-exclamation"></i> No Plan Active</div>
+                </div>
+                <div class="balance-card">
+                    <p data-i18n="balance_text">Total Balance (Main)</p>
+                    <h1>৳<span id="balance">0.00</span></h1>
+                    <div class="coin-box">
+                        <i class="fa-solid fa-coins" style="color: var(--coin-color); font-size: 22px;"></i> 
+                        <span id="coins" style="font-size: 18px;">0</span>
+                        <button class="btn-convert" onclick="window.convertCoins()" style="margin-left:5px;">Convert ৳</button>
+                    </div>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-box" style="color: var(--warning);" onclick="window.claimDailyBonus()">
+                        <div style="background: rgba(255,165,2,0.1); padding: 12px; border-radius: 50%; width: max-content; margin: 0 auto;"><i class="fa-solid fa-gift" style="font-size: 22px;"></i></div>
+                        <span data-i18n="daily_bonus">Daily Bonus</span>
+                    </div>
+                    <div class="feature-box" style="color: var(--spin-color);" onclick="window.switchTab('sec-tasks', document.getElementById('nav-game'))">
+                        <div style="background: rgba(155,89,182,0.1); padding: 12px; border-radius: 50%; width: max-content; margin: 0 auto;"><i class="fa-solid fa-gamepad" style="font-size: 22px;"></i></div>
+                        <span data-i18n="play_games">Play Games</span>
+                    </div>
+                    <div class="feature-box" style="color: var(--info);" onclick="window.switchTab('sec-wallet', document.getElementById('nav-wallet'))">
+                        <div style="background: rgba(30,144,255,0.1); padding: 12px; border-radius: 50%; width: max-content; margin: 0 auto;"><i class="fa-solid fa-wallet" style="font-size: 22px;"></i></div>
+                        <span data-i18n="wallet">Wallet</span>
+                    </div>
+                    <div class="feature-box" style="color: var(--success);" onclick="window.switchTab('sec-plans', document.getElementById('nav-plans'))">
+                        <div style="background: rgba(5,205,153,0.1); padding: 12px; border-radius: 50%; width: max-content; margin: 0 auto;"><i class="fa-solid fa-boxes-stacked" style="font-size: 22px;"></i></div>
+                        <span data-i18n="buy_plan">Buy Plan</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 16px; margin-bottom:10px;"><i class="fa-solid fa-circle-info" style="color:var(--primary);"></i> Notice</h3>
+                    <p style="font-size: 13px; color:#7f8c8d; line-height: 1.6;" data-i18n="home_note">You must purchase an Investment Plan to play games and complete tasks. Deposit money in your wallet and buy a plan to start earning!</p>
+                </div>
+            </div>
+
+            <!-- GAMES & TASKS TAB -->
+            <div id="sec-tasks" class="section">
+                <div class="game-banner" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);" onclick="window.openScratchCard()">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <i class="fa-solid fa-ticket" style="color: #e84393;"></i>
+                        <div>
+                            <h3 style="color: #2d3436; margin-bottom: 5px; font-size:18px;">Scratch Card</h3>
+                            <p style="font-size: 12px; color: #636e72; font-weight: 500;">Win up to <span id="ui-scratch-rew">50</span> Coins</p>
+                        </div>
+                    </div>
+                    <span class="limit-badge" id="ui-scratch-limit">0 Left</span>
+                </div>
+                <div class="game-banner" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);" onclick="window.openMathQuiz()">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <i class="fa-solid fa-calculator" style="color: #4a69bd;"></i>
+                        <div>
+                            <h3 style="color: #2d3436; margin-bottom: 5px; font-size:18px;">Math Quiz</h3>
+                            <p style="font-size: 12px; color: #636e72; font-weight: 500;">Earn <span id="ui-math-rew">20</span> Coins</p>
+                        </div>
+                    </div>
+                    <span class="limit-badge" id="ui-math-limit">0 Left</span>
+                </div>
+
+                <h4 style="margin: 25px 0 15px; font-size: 16px;"><i class="fa-solid fa-video" style="color: var(--primary);"></i> Daily Tasks</h4>
+                <div class="task-item">
+                    <div>
+                        <h4>Watch Video</h4>
+                        <p style="font-size: 12px; color: #7f8c8d; font-weight: 500;">Reward: <span id="ui-vid-rew" style="color: var(--warning); font-weight: bold;">100</span> Coins</p>
+                    </div>
+                    <button class="btn-task" onclick="window.doVideoTask()"><i class="fa-solid fa-play"></i> Watch</button>
+                </div>
+                <div class="task-item">
+                    <div>
+                        <h4>Visit Website</h4>
+                        <p style="font-size: 12px; color: #7f8c8d; font-weight: 500;">Reward: <span id="ui-web-rew" style="color: var(--warning); font-weight: bold;">150</span> Coins</p>
+                    </div>
+                    <button class="btn-task" style="background: var(--spin-color);" onclick="window.doWebTask()"><i class="fa-solid fa-globe"></i> Visit</button>
+                </div>
+            </div>
+
+            <!-- INVESTMENT PLANS TAB -->
+            <div id="sec-plans" class="section">
+                <h3 style="margin-bottom: 15px; font-size: 18px;"><i class="fa-solid fa-boxes-stacked" style="color:var(--primary);"></i> Investment Plans</h3>
+                <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 20px;" data-i18n="plan_note">Purchase a plan using your Main Balance to unlock daily tasks and earning.</p>
+                <div id="plans-container"><p style="text-align:center;">Loading Plans...</p></div>
+            </div>
+
+            <!-- WALLET TAB -->
+            <div id="sec-wallet" class="section">
+                <div class="wallet-tabs">
+                    <div class="w-tab active" id="tab-btn-dep" onclick="window.switchWalletTab('deposit')">Add Money</div>
+                    <div class="w-tab" id="tab-btn-with" onclick="window.switchWalletTab('withdraw')">Withdraw</div>
+                </div>
+
+                <div class="card" id="card-deposit">
+                    <h3 style="margin-bottom: 15px; font-size: 16px;"><i class="fa-solid fa-hand-holding-dollar" style="color: var(--info);"></i> Deposit to Balance</h3>
+                    <div style="background: rgba(30, 144, 255, 0.08); padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; font-weight: 600; border: 1px dashed var(--info);">
+                        <p style="margin-bottom: 8px; color:#555; font-weight:500;">Send money to the numbers below:</p>
+                        <div style="margin-bottom: 5px;"><i class="fa-solid fa-building-columns"></i> bKash: <span id="ui-admin-bkash" style="color:var(--info);">Not Set</span></div>
+                        <div><i class="fa-solid fa-building-columns"></i> Nagad: <span id="ui-admin-nagad" style="color:var(--warning);">Not Set</span></div>
+                    </div>
+                    
+                    <div class="pay-methods-grid">
+                        <div class="pay-method-box sel-dep" id="dep-bKash" onclick="window.selectDepMethod('bKash')">bKash</div>
+                        <div class="pay-method-box" id="dep-Nagad" onclick="window.selectDepMethod('Nagad')">Nagad</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Sender Number</label>
+                        <input type="number" id="dep-phone" placeholder="e.g. 017XXXXXXXX (11 Digits)">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount Sent (৳)</label>
+                        <input type="number" id="dep-amount" placeholder="e.g. 500">
+                    </div>
+                    <div class="form-group">
+                        <label>Transaction ID (TrxID)</label>
+                        <input type="text" id="dep-trx" placeholder="Minimum 8 characters">
+                    </div>
+                    <button class="btn-main" style="background: linear-gradient(135deg, var(--info), #00a8ff);" onclick="window.makeDeposit()"><i class="fa-solid fa-paper-plane"></i> Submit Request</button>
+                </div>
+
+                <div class="card" id="card-withdraw" style="display:none;">
+                    <h3 style="margin-bottom: 15px; font-size: 16px;"><i class="fa-solid fa-money-bill-transfer" style="color: var(--warning);"></i> Withdraw Balance</h3>
+                    <div class="pay-methods-grid" id="dynamic-payment-methods"></div>
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input type="number" id="with-phone" placeholder="e.g. 017XXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Withdraw Amount (৳)</label>
+                        <input type="number" id="with-amount" placeholder="Loading...">
+                    </div>
+                    <button class="btn-main" style="background: linear-gradient(135deg, var(--warning), #e67e22);" onclick="window.makeWithdraw()"><i class="fa-solid fa-paper-plane"></i> Submit Withdraw</button>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 15px; font-size: 16px;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Transactions</h3>
+                    <div id="history-container"><p style="text-align: center; color: #888; font-size: 13px; padding: 10px;">Loading history...</p></div>
+                </div>
+            </div>
+
+            <!-- PROFILE TAB -->
+            <div id="sec-profile" class="section">
+                <div class="card" id="profile-card" style="text-align: center; padding: 30px 20px;">
+                    <img src="" id="prof-avatar" style="width: 90px; height: 90px; border-radius: 50%; margin-bottom: 15px; border: 4px solid var(--primary); padding: 3px;">
+                    <h2 id="prof-name" style="font-size: 22px; margin-bottom: 5px;">Name</h2>
+                    <p style="color: #7f8c8d; font-weight: 500;" id="prof-phone">017...</p>
+                </div>
+
+                <div class="card" style="padding: 15px 20px; background: rgba(67, 24, 255, 0.05); border: 2px dashed var(--primary);">
+                    <h3 style="font-size: 15px; margin-bottom: 10px;"><i class="fa-solid fa-users" style="color: var(--primary);"></i> Refer & Earn</h3>
+                    <p style="font-size: 12px; color: #555; margin-bottom: 10px;">Share your phone number as a referral code. You get <strong style="color:var(--warning);" id="ui-ref-bonus">...</strong> coins!</p>
+                    <div style="background: var(--card-bg); border: 1px solid var(--border); padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 16px; color: var(--text-color);">
+                        <span id="my-refer-code">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="card" style="padding: 10px 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 15px 0;" onclick="window.logout()">
+                        <span style="color: var(--danger); font-weight: 600; font-size: 15px;"><i class="fa-solid fa-power-off" style="width: 25px;"></i> Logout from Device</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" id="nav-home" onclick="window.switchTab('sec-home', this)"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">Home</span></div>
+            <div class="nav-item" id="nav-game" onclick="window.switchTab('sec-tasks', this)"><i class="fa-solid fa-gamepad"></i><span data-i18n="nav_task">Tasks</span></div>
+            <div class="nav-item" id="nav-plans" onclick="window.switchTab('sec-plans', this)"><i class="fa-solid fa-boxes-stacked"></i><span data-i18n="nav_plan">Plans</span></div>
+            <div class="nav-item" id="nav-wallet" onclick="window.switchTab('sec-wallet', this)"><i class="fa-solid fa-wallet"></i><span data-i18n="nav_wallet">Wallet</span></div>
+            <div class="nav-item" id="nav-profile" onclick="window.switchTab('sec-profile', this)"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">Profile</span></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, set, get, onValue, update, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoQw5dhwS5JJZIWSPQTgKdMtB5ZEsoxLk",
+      authDomain: "arng-805db.firebaseapp.com",
+      projectId: "arng-805db",
+      storageBucket: "arng-805db.firebasestorage.app",
+      messagingSenderId: "363993462640",
+      appId: "1:363993462640:web:22247bdf806f062a3b01b5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let appSettings = { notice: "Welcome!", coinRate: 1000, convertReward: 10, minWithdraw: 50, scratchReward: 50, mathReward: 20, dailyBonusAmount: 100, referBonus: 200, adminBkash: "", adminNagad: "", videoLink: "", videoReward: 100, webLink: "", webReward: 150, plans: {} };
+    let userData = null;
+    let selectedMethod = '';
+    let selectedDepMethod = 'bKash';
+    let currentLang = localStorage.getItem('lang') || 'en';
+
+    const translations = {
+        en: {
+            login_title: "Welcome Back!", login_btn: "Login to Account", go_signup: "Create new account",
+            signup_title: "Create Account", signup_btn: "Register Now", go_login: "Already have an account? Login",
+            balance_text: "Total Balance (Main)", daily_bonus: "Daily Bonus", play_games: "Play Games", wallet: "Wallet", buy_plan: "Buy Plan",
+            home_note: "You must purchase an Investment Plan to play games and complete tasks. Deposit money in your wallet and buy a plan to start earning!",
+            plan_note: "Purchase a plan using your Main Balance to unlock daily tasks and earning.",
+            nav_home: "Home", nav_task: "Tasks", nav_plan: "Plans", nav_wallet: "Wallet", nav_profile: "Profile"
+        },
+        bn: {
+            login_title: "স্বাগতম!", login_btn: "লগইন করুন", go_signup: "নতুন একাউন্ট খুলুন",
+            signup_title: "একাউন্ট তৈরি করুন", signup_btn: "রেজিস্টার করুন", go_login: "একাউন্ট থাকলে লগইন করুন",
+            balance_text: "মোট ব্যালেন্স (মেইন)", daily_bonus: "ডেইলি বোনাস", play_games: "গেমস খেলুন", wallet: "ওয়ালেট", buy_plan: "প্ল্যান কিনুন",
+            home_note: "টাস্ক বা গেম খেলার জন্য আপনাকে একটি ইনভেস্টমেন্ট প্ল্যান কিনতে হবে। ওয়ালেটে টাকা এড করে প্ল্যান কিনুন এবং ইনকাম শুরু করুন!",
+            plan_note: "আপনার মেইন ব্যালেন্স ব্যবহার করে প্ল্যান কিনুন এবং প্রতিদিন ইনকাম করুন।",
+            nav_home: "হোম", nav_task: "টাস্ক", nav_plan: "প্ল্যান", nav_wallet: "ওয়ালেট", nav_profile: "প্রোফাইল"
+        }
+    };
+
+    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+
+    if(localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+    }
+    
+    setTimeout(() => { 
+        document.getElementById('splash-screen').style.opacity = '0';
+        setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; applyLang(); }, 500);
+    }, 2000);
+
+    // ================= LANGUAGE TOGGLE =================
+    window.toggleLanguage = () => {
+        currentLang = currentLang === 'en' ? 'bn' : 'en';
+        localStorage.setItem('lang', currentLang);
+        applyLang();
+    }
+    function applyLang() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            let key = el.getAttribute('data-i18n');
+            if(translations[currentLang][key]) el.innerText = translations[currentLang][key];
+        });
+    }
+
+    // ================= PASSWORD EYE TOGGLE =================
+    window.togglePass = (inputId) => {
+        let input = document.getElementById(inputId);
+        let icon = input.nextElementSibling;
+        if(input.type === "password") { input.type = "text"; icon.classList.replace("fa-eye", "fa-eye-slash"); }
+        else { input.type = "password"; icon.classList.replace("fa-eye-slash", "fa-eye"); }
+    }
+
+    // ================= REALTIME SETTINGS =================
+    onValue(ref(db, 'settings'), (snapshot) => {
+        if(snapshot.exists()) {
+            appSettings = { ...appSettings, ...snapshot.val() };
+            
+            document.getElementById('dynamic-notice').innerText = appSettings.notice;
+            document.getElementById('with-amount').placeholder = `Min Withdraw ৳${appSettings.minWithdraw}`;
+            document.getElementById('ui-scratch-rew').innerText = appSettings.scratchReward;
+            document.getElementById('ui-math-rew').innerText = appSettings.mathReward;
+            document.getElementById('ui-vid-rew').innerText = appSettings.videoReward || 100;
+            document.getElementById('ui-web-rew').innerText = appSettings.webReward || 150;
+            document.getElementById('ui-admin-bkash').innerText = appSettings.adminBkash || 'Not Set';
+            document.getElementById('ui-admin-nagad').innerText = appSettings.adminNagad || 'Not Set';
+            document.getElementById('ui-ref-bonus').innerText = appSettings.referBonus || 200;
+
+            if(appSettings.paymentMethods) {
+                let pmContainer = document.getElementById('dynamic-payment-methods');
+                let html = ''; let first = true;
+                Object.keys(appSettings.paymentMethods).forEach(k => {
+                    if(appSettings.paymentMethods[k].active) {
+                        html += `<div class="pay-method-box ${first ? 'selected' : ''}" id="pm-${k}" onclick="window.selectMethod('${k}')">${k}</div>`;
+                        if(first) { selectedMethod = k; first = false; }
+                    }
+                });
+                if(html === '') html = '<p style="font-size:12px; color:red; grid-column:span 2; text-align:center;">No methods available.</p>';
+                pmContainer.innerHTML = html;
+            }
+            renderPlans();
+            if(userData) updateLimitsUI();
+        }
+    });
+
+    function renderPlans() {
+        let container = document.getElementById('plans-container');
+        container.innerHTML = '';
+        if(appSettings.plans && Object.keys(appSettings.plans).length > 0) {
+            Object.keys(appSettings.plans).forEach(k => {
+                let p = appSettings.plans[k];
+                container.innerHTML += `
+                    <div class="plan-item">
+                        <div class="plan-name">${p.name} Plan</div>
+                        <div class="plan-price">৳${p.price}</div>
+                        <div class="plan-details">
+                            <div><i class="fa-solid fa-calendar-check"></i> Validity: ${p.days} Days</div>
+                            <div><i class="fa-solid fa-bolt"></i> Daily Limit: ${p.limit} Tasks</div>
+                        </div>
+                        <button class="btn-main" onclick="window.buyPlan('${k}', ${p.price}, ${p.days})">Purchase Plan</button>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    window.switchWalletTab = (tab) => {
+        if(tab === 'deposit') {
+            document.getElementById('card-deposit').style.display = 'block';
+            document.getElementById('card-withdraw').style.display = 'none';
+            document.getElementById('tab-btn-dep').classList.add('active');
+            document.getElementById('tab-btn-with').classList.remove('active');
+        } else {
+            document.getElementById('card-deposit').style.display = 'none';
+            document.getElementById('card-withdraw').style.display = 'block';
+            document.getElementById('tab-btn-dep').classList.remove('active');
+            document.getElementById('tab-btn-with').classList.add('active');
+        }
+    }
+
+    window.selectMethod = (m) => {
+        selectedMethod = m;
+        document.querySelectorAll('.pay-method-box:not(#dep-bKash):not(#dep-Nagad)').forEach(el => el.classList.remove('selected'));
+        document.getElementById('pm-'+m).classList.add('selected');
+    }
+    
+    window.selectDepMethod = (m) => {
+        selectedDepMethod = m;
+        document.getElementById('dep-bKash').classList.remove('sel-dep');
+        document.getElementById('dep-Nagad').classList.remove('sel-dep');
+        document.getElementById('dep-'+m).classList.add('sel-dep');
+    }
+
+    // ================= AUTHENTICATION =================
+    const savedPhone = localStorage.getItem('loggedInPhone');
+    if(savedPhone) startUserListener(savedPhone);
+    else document.getElementById('auth-page').style.display = 'flex';
+
+    window.toggleAuth = (type) => {
+        document.getElementById('login-section').style.display = type === 'login' ? 'block' : 'none';
+        document.getElementById('signup-section').style.display = type === 'signup' ? 'block' : 'none';
+    }
+
+    window.startRegister = async () => {
+        const name = document.getElementById('reg-name').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const pass = document.getElementById('reg-password').value;
+        const refer = document.getElementById('reg-refer').value.trim();
+
+        if(name.length < 3) return Toast.fire({icon: 'error', title: 'Name too short!'});
+        if(phone.length !== 11) return Toast.fire({icon: 'error', title: 'Phone must be exactly 11 digits!'});
+        if(pass.length < 8) return Toast.fire({icon: 'error', title: 'Password must be at least 8 characters!'});
+
+        const userRef = ref(db, 'users/' + phone);
+        const snap = await get(userRef);
+        if(snap.exists()) return Swal.fire('Error', 'Account already exists!', 'error');
+
+        Swal.showLoading();
+
+        // Refer System Logic
+        if(refer && refer !== phone) {
+            const refSnap = await get(ref(db, 'users/' + refer));
+            if(refSnap.exists()) {
+                let refUser = refSnap.val();
+                let bonus = Number(appSettings.referBonus) || 200;
+                await update(ref(db, 'users/' + refer), { coins: (Number(refUser.coins) || 0) + bonus });
+            }
+        }
+
+        const newUser = { 
+            name, phone, pass, balance: 0.0, coins: 0, currentPlan: null, planExpire: 0,
+            joinedAt: new Date().toLocaleDateString(), scratchCount: 0, mathCount: 0, vidCount: 0, webCount: 0,
+            lastScratchDate: '', lastMathDate: '', lastVidDate: '', lastWebDate: '', lastBonusDate: '', totalWithdrawn: 0
+        };
+        
+        await set(userRef, newUser);
+        localStorage.setItem('loggedInPhone', phone);
+        Swal.close();
+        Toast.fire({icon: 'success', title: 'Registration Successful!'}).then(() => startUserListener(phone));
+    }
+
+    window.loginUser = async () => {
+        const phone = document.getElementById('login-phone').value;
+        const pass = document.getElementById('login-password').value;
+        if(!phone || !pass) return Toast.fire({icon: 'warning', title: 'Enter phone and password!'});
+
+        Swal.showLoading();
+        const snap = await get(ref(db, 'users/' + phone));
+        Swal.close();
+        
+        if(snap.exists() && snap.val().pass === pass) {
+            localStorage.setItem('loggedInPhone', phone);
+            Toast.fire({icon: 'success', title: 'Login Successful!'});
+            startUserListener(phone);
+        } else {
+            Swal.fire('Error', 'Incorrect Phone or Password!', 'error');
+        }
+    }
+
+    window.forgotPassword = async () => {
+        const { value: phone } = await Swal.fire({
+            title: 'Reset Password', input: 'number', inputPlaceholder: 'Enter your registered phone', showCancelButton: true, confirmButtonColor: '#4318ff'
+        });
+        if(phone) {
+            if(phone.length !== 11) return Toast.fire({icon: 'error', title: 'Phone must be exactly 11 digits!'});
+            const snap = await get(ref(db, 'users/' + phone));
+            if(!snap.exists()) return Swal.fire('Error', 'No account found with this number!', 'error');
+            await set(ref(db, 'password_requests/' + phone), { phone, status: 'Pending', date: new Date().toLocaleString() });
+            Swal.fire('Request Sent!', 'Admin has been notified. Check back later.', 'success');
+        }
+    }
+
+    window.logout = () => {
+        Swal.fire({ title: 'Logout?', text: "Are you sure?", icon: 'warning', showCancelButton: true, confirmButtonText: 'Yes' }).then((res) => {
+            if (res.isConfirmed) { localStorage.removeItem('loggedInPhone'); window.location.reload(); }
+        });
+    }
+
+    function startUserListener(phone) {
+        document.getElementById('auth-page').style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+        
+        onValue(ref(db, 'users/' + phone), (snapshot) => {
+            if(snapshot.exists()) {
+                userData = snapshot.val();
+                userData.balance = Number(userData.balance) || 0;
+                userData.coins = Number(userData.coins) || 0;
+                userData.scratchCount = Number(userData.scratchCount) || 0;
+                userData.mathCount = Number(userData.mathCount) || 0;
+                userData.vidCount = Number(userData.vidCount) || 0;
+                userData.webCount = Number(userData.webCount) || 0;
+                updateUI();
+                updateLimitsUI();
+            } else {
+                localStorage.removeItem('loggedInPhone');
+                window.location.reload();
+            }
+        });
+
+        // Listener for History and Deposit Notifications
+        const loadHistory = async () => {
+            let container = document.getElementById('history-container');
+            let historyArray =[];
+            
+            const withSnap = await get(ref(db, 'withdrawals'));
+            if(withSnap.exists()) {
+                Object.values(withSnap.val()).forEach(req => {
+                    if(req.userPhone === phone) historyArray.push({...req, type: 'Withdraw', sortDate: req.timestamp || new Date(req.date).getTime()});
+                });
+            }
+            
+            const depSnap = await get(ref(db, 'deposits'));
+            if(depSnap.exists()) {
+                Object.values(depSnap.val()).forEach(req => {
+                    if(req.userPhone === phone) {
+                        historyArray.push({...req, type: 'Deposit', sortDate: req.timestamp || new Date(req.date).getTime()});
+                        // Notification Logic for Approved Deposits
+                        if(req.status === 'Approved' && req.notified === false) {
+                            Swal.fire('Money Added! 🎉', `Your deposit of ৳${req.amount} has been approved by admin.`, 'success');
+                            update(ref(db, 'deposits/' + req.id), { notified: true });
+                        }
+                    }
+                });
+            }
+            
+            historyArray.sort((a, b) => b.sortDate - a.sortDate); 
+            
+            container.innerHTML = '';
+            if(historyArray.length > 0) {
+                historyArray.forEach(item => {
+                    let color = item.type === 'Deposit' ? 'var(--info)' : 'var(--warning)';
+                    container.innerHTML += `
+                        <div class="history-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border);">
+                            <div><strong style="font-size:14px; color:${color};">${item.type} (${item.method})</strong><br><span style="font-size:11px; color:#888;">${item.date}</span></div>
+                            <div style="text-align:right;"><strong style="font-size:14px;">৳${item.amount}</strong><br><span class="status-badge" style="padding:3px 8px; border-radius:6px; font-size:11px; font-weight:bold; color:white; background:${item.status==='Approved'?'var(--success)':(item.status==='Rejected'?'var(--danger)':'var(--warning)')}">${item.status}</span></div>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = `<p style="text-align:center; color:#888; font-size:13px; padding:10px;">No transactions found.</p>`;
+            }
+        };
+        
+        onValue(ref(db, 'withdrawals'), () => loadHistory());
+        onValue(ref(db, 'deposits'), () => loadHistory());
+    }
+
+    function updateUserData() {
+        if(userData && userData.phone) update(ref(db, 'users/' + userData.phone), userData);
+    }
+
+    function updateUI() {
+        if(!userData) return;
+        document.getElementById('display-user').innerText = userData.name;
+        document.getElementById('balance').innerText = userData.balance.toFixed(2);
+        document.getElementById('coins').innerText = userData.coins;
+        document.getElementById('my-refer-code').innerText = userData.phone;
+        
+        const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.phone}&backgroundColor=e2e8f0`;
+        document.getElementById('header-avatar').src = avatarUrl;
+        document.getElementById('prof-avatar').src = avatarUrl;
+        document.getElementById('prof-name').innerText = userData.name;
+        document.getElementById('prof-phone').innerText = userData.phone;
+
+        let planBadge = document.getElementById('ui-plan-badge');
+        if(hasValidPlan()) {
+            let pName = appSettings.plans[userData.currentPlan] ? appSettings.plans[userData.currentPlan].name : "Premium";
+            let expDate = new Date(userData.planExpire).toLocaleDateString();
+            planBadge.innerHTML = `<i class="fa-solid fa-gem"></i> ${pName} Plan (Exp: ${expDate})`;
+            planBadge.className = "plan-badge-top";
+        } else {
+            planBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> No Plan Active`;
+            planBadge.className = "plan-badge-top danger";
+        }
+    }
+
+    function hasValidPlan() {
+        return userData && userData.currentPlan && userData.planExpire && new Date().getTime() <= userData.planExpire;
+    }
+
+    function updateLimitsUI() {
+        if(!hasValidPlan()) {
+            document.getElementById('ui-scratch-limit').innerText = "0 Left (Buy Plan)";
+            document.getElementById('ui-math-limit').innerText = "0 Left (Buy Plan)";
+            return;
+        }
+
+        const today = new Date().toLocaleDateString();
+        let sCount = userData.lastScratchDate === today ? userData.scratchCount : 0;
+        let mCount = userData.lastMathDate === today ? userData.mathCount : 0;
+        
+        let planLimit = appSettings.plans[userData.currentPlan] ? appSettings.plans[userData.currentPlan].limit : 10;
+        let sLeft = planLimit - sCount;
+        let mLeft = planLimit - mCount;
+        
+        document.getElementById('ui-scratch-limit').innerText = `${sLeft} Left`;
+        document.getElementById('ui-math-limit').innerText = `${mLeft} Left`;
+    }
+
+    window.switchTab = (tabId, el) => {
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        if(el) el.classList.add('active');
+    }
+
+    window.toggleTheme = () => {
+        let isDark = document.body.classList.toggle('dark-mode');
+        document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    // ================= FEATURES =================
+    window.convertCoins = () => {
+        const rate = Number(appSettings.coinRate) || 1000;
+        const reward = Number(appSettings.convertReward) || 10;
+        
+        if(userData.coins >= rate) {
+            let sets = Math.floor(userData.coins / rate);
+            let tk = sets * reward; 
+            userData.coins = userData.coins % rate; 
+            userData.balance = userData.balance + tk;
+            updateUserData();
+            Swal.fire('Converted!', `You got ৳${tk}!`, 'success');
+        } else {
+            Swal.fire('Opps!', `You need ${rate} coins to convert!`, 'warning');
+        }
+    }
+
+    window.claimDailyBonus = () => {
+        if(!hasValidPlan()) return Swal.fire('No Active Plan', 'Please buy an Investment Plan to claim bonus!', 'error');
+        const today = new Date().toLocaleDateString();
+        if(userData.lastBonusDate === today) return Swal.fire('Oops', 'You have already claimed today\'s bonus!', 'warning');
+        
+        let bonus = Number(appSettings.dailyBonusAmount) || 100;
+        userData.coins += bonus;
+        userData.lastBonusDate = today;
+        updateUserData();
+        Swal.fire('Awesome!', `You received ${bonus} Daily Bonus Coins!`, 'success');
+    }
+
+    // ================= PURCHASE PLAN =================
+    window.buyPlan = (planKey, price, days) => { 
+        Swal.fire({
+            title: 'Purchase Plan?',
+            text: `৳${price} will be deducted from your Main Balance for ${days} days validity.`,
+            icon: 'question',
+            showCancelButton: true, confirmButtonText: 'Yes, Buy Now', confirmButtonColor: '#4318ff'
+        }).then(res => {
+            if(res.isConfirmed) {
+                if(userData.balance >= price) {
+                    userData.balance -= price;
+                    userData.currentPlan = planKey;
+                    userData.planExpire = new Date().getTime() + (days * 24 * 60 * 60 * 1000);
+                    userData.scratchCount = 0; userData.mathCount = 0; userData.vidCount = 0; userData.webCount = 0;
+                    updateUserData();
+                    Swal.fire('Congratulations! 👑', 'Plan activated successfully. You can now complete tasks!', 'success');
+                    window.switchTab('sec-home', document.getElementById('nav-home'));
+                } else {
+                    Swal.fire('Insufficient Balance', `You need ৳${price} to buy this plan. Please Add Money first.`, 'error');
+                    window.switchTab('sec-wallet', document.getElementById('nav-wallet'));
+                }
+            }
+        });
+    }
+
+    // ================= DEPOSIT SUBMIT =================
+    window.makeDeposit = async () => {
+        const phone = document.getElementById('dep-phone').value.trim();
+        const amount = Number(document.getElementById('dep-amount').value);
+        const trx = document.getElementById('dep-trx').value.trim();
+
+        if(phone.length !== 11) return Toast.fire({icon: 'error', title: 'Sender number must be 11 digits!'});
+        if(!amount || amount < 50) return Swal.fire('Error', `Minimum deposit is ৳50!`, 'error');
+        if(trx.length < 8 || trx.length > 12) return Toast.fire({icon: 'error', title: 'Invalid TrxID! (Must be 8-12 characters)'});
+
+        Swal.showLoading();
+        const newDepRef = push(ref(db, 'deposits'));
+        await set(newDepRef, {
+            id: newDepRef.key, 
+            user: userData.name, 
+            userPhone: userData.phone,
+            method: selectedDepMethod, 
+            senderPhone: phone, 
+            amount: amount, 
+            trxId: trx,
+            status: 'Pending', 
+            notified: true, // Will be false when approved
+            timestamp: Date.now(),
+            date: new Date().toLocaleString()
+        });
+
+        Swal.fire('Request Submitted!', 'Please wait for Admin approval. Balance will be added soon.', 'success');
+        document.getElementById('dep-amount').value = ''; document.getElementById('dep-phone').value = ''; document.getElementById('dep-trx').value = '';
+    }
+
+    // ================= WITHDRAW SUBMIT =================
+    window.makeWithdraw = async () => {
+        const phone = document.getElementById('with-phone').value.trim();
+        const amount = Number(document.getElementById('with-amount').value);
+        const minWith = Number(appSettings.minWithdraw) || 50;
+
+        if(!selectedMethod) return Toast.fire({icon: 'warning', title: 'Select a Payment Method!'});
+        if(phone.length !== 11) return Toast.fire({icon: 'error', title: 'Account number must be 11 digits!'});
+        if(!amount || amount < minWith) return Swal.fire('Error', `Minimum withdraw is ৳${minWith}!`, 'error');
+        if(amount > userData.balance) return Swal.fire('Error', 'Insufficient Balance!', 'error');
+
+        userData.balance -= amount;
+        updateUserData();
+
+        Swal.showLoading();
+        const newReqRef = push(ref(db, 'withdrawals'));
+        await set(newReqRef, {
+            id: newReqRef.key, user: userData.name, userPhone: userData.phone,
+            method: selectedMethod, phone: phone, amount: amount, status: 'Pending', timestamp: Date.now(), date: new Date().toLocaleString()
+        });
+
+        Swal.fire('Request Submitted!', 'Your withdraw request has been sent.', 'success');
+        document.getElementById('with-amount').value = ''; document.getElementById('with-phone').value = '';
+    }
+
+    // ================= GAMES & TASKS LOGIC =================
+    function checkPlanBeforeTask() {
+        if(!hasValidPlan()) {
+            Swal.fire('No Active Plan', 'Please buy an Investment Plan to start earning!', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    window.openScratchCard = () => {
+        if(!checkPlanBeforeTask()) return;
+        const today = new Date().toLocaleDateString();
+        if(userData.lastScratchDate !== today) { userData.scratchCount = 0; userData.lastScratchDate = today; }
+        
+        let planLimit = appSettings.plans[userData.currentPlan].limit;
+        if(userData.scratchCount >= planLimit) return Swal.fire('Limit Reached', 'Daily limit reached for your current plan.', 'warning');
+        
+        const winReward = Number(appSettings.scratchReward) || 50;
+
+        Swal.fire({
+            title: 'Scratch & Win',
+            html: `
+                <div style="position:relative; width:260px; height:150px; margin:auto; border-radius:12px; overflow:hidden; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
+                    <div style="position:absolute; inset:0; background:linear-gradient(135deg, #f1c40f, #e67e22); display:flex; justify-content:center; align-items:center; color:white; font-size:26px; font-weight:bold;">🎁 ${winReward} Coins</div>
+                    <canvas id="scratch-canvas" width="260" height="150" style="position:absolute; top:0; left:0; cursor:pointer;"></canvas>
+                </div>
+            `,
+            showConfirmButton: false, showCloseButton: true,
+            didOpen: () => {
+                const canvas = document.getElementById('scratch-canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#bdc3c7'; ctx.fillRect(0, 0, 260, 150);
+                ctx.fillStyle = '#7f8c8d'; ctx.font = '20px Poppins'; ctx.textAlign = 'center'; ctx.fillText('Scratch Here', 130, 80);
+
+                let isDrawing = false, scratchedArea = 0;
+                const scratch = (e) => {
+                    if (!isDrawing) return;
+                    let rect = canvas.getBoundingClientRect();
+                    let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                    let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI * 2); ctx.fill();
+                    scratchedArea++;
+                    if(scratchedArea > 40) {
+                        canvas.style.transition = '0.5s'; canvas.style.opacity = '0';
+                        setTimeout(() => {
+                            canvas.style.display = 'none';
+                            userData.coins += winReward; userData.scratchCount++; updateUserData(); Swal.close();
+                            Swal.fire('Congratulations!', `You won ${winReward} Coins!`, 'success');
+                        }, 500); isDrawing = false;
+                    }
+                };
+                canvas.addEventListener('mousedown', () => isDrawing = true); canvas.addEventListener('mouseup', () => isDrawing = false);
+                canvas.addEventListener('mousemove', scratch);
+                canvas.addEventListener('touchstart', (e) => { isDrawing = true; e.preventDefault(); }, {passive: false});
+                canvas.addEventListener('touchend', () => isDrawing = false);
+                canvas.addEventListener('touchmove', (e) => { scratch(e); e.preventDefault(); }, {passive: false});
+            }
+        });
+    }
+
+    window.openMathQuiz = () => {
+        if(!checkPlanBeforeTask()) return;
+        const today = new Date().toLocaleDateString();
+        if(userData.lastMathDate !== today) { userData.mathCount = 0; userData.lastMathDate = today; }
+        
+        let planLimit = appSettings.plans[userData.currentPlan].limit;
+        if(userData.mathCount >= planLimit) return Swal.fire('Limit Reached', 'Daily limit reached for your current plan.', 'warning');
+
+        let a = Math.floor(Math.random() * 50) + 1; let b = Math.floor(Math.random() * 50) + 1;
+        const winReward = Number(appSettings.mathReward) || 20;
+        
+        Swal.fire({
+            title: 'Math Quiz', html: `<div style="font-size:30px; font-weight:bold; color:var(--primary); margin:10px 0;">${a} + ${b} = ?</div>`, 
+            input: 'number', inputPlaceholder: 'Answer', showCancelButton: true, confirmButtonText: 'Submit Answer', confirmButtonColor: '#4318ff'
+        }).then(res => {
+            if(res.isConfirmed) {
+                if(parseInt(res.value) === (a + b)) {
+                    userData.coins += winReward; userData.mathCount++; updateUserData(); 
+                    Toast.fire({icon: 'success', title: `Correct! +${winReward} Coins`});
+                } else Swal.fire('Wrong Answer', 'Try again later!', 'error');
+            }
+        });
+    }
+
+    window.doVideoTask = () => {
+        if(!checkPlanBeforeTask()) return;
+        if(!appSettings.videoLink) return Toast.fire({icon: 'info', title: 'No task available currently.'});
+        
+        const today = new Date().toLocaleDateString();
+        if(userData.lastVidDate !== today) { userData.vidCount = 0; userData.lastVidDate = today; }
+        let planLimit = appSettings.plans[userData.currentPlan].limit;
+        if(userData.vidCount >= planLimit) return Swal.fire('Limit Reached', 'Daily limit reached for your current plan.', 'warning');
+
+        const winReward = Number(appSettings.videoReward) || 100;
+        window.open(appSettings.videoLink, '_blank');
+        setTimeout(() => { userData.coins += winReward; userData.vidCount++; updateUserData(); Toast.fire({icon: 'success', title: `+${winReward} Coins added!`}); }, 8000); 
+    }
+
+    window.doWebTask = () => {
+        if(!checkPlanBeforeTask()) return;
+        if(!appSettings.webLink) return Toast.fire({icon: 'info', title: 'No task available currently.'});
+        
+        const today = new Date().toLocaleDateString();
+        if(userData.lastWebDate !== today) { userData.webCount = 0; userData.lastWebDate = today; }
+        let planLimit = appSettings.plans[userData.currentPlan].limit;
+        if(userData.webCount >= planLimit) return Swal.fire('Limit Reached', 'Daily limit reached for your current plan.', 'warning');
+
+        const winReward = Number(appSettings.webReward) || 150;
+        window.open(appSettings.webLink, '_blank');
+        setTimeout(() => { userData.coins += winReward; userData.webCount++; updateUserData(); Toast.fire({icon: 'success', title: `+${winReward} Coins added!`}); }, 8000);
+    }
+</script>
+</body>
+</html>
