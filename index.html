@@ -3,43 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Status</title>
+    <title>Live Tracker Plus</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 80%; max-width: 350px; }
-        h2 { color: #333; margin-bottom: 5px; }
-        p { color: #666; font-size: 14px; margin-bottom: 20px; }
-        .btn { padding: 15px 30px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; transition: 0.3s; width: 100%; box-sizing: border-box;}
-        .btn-start { background-color: #2563eb; }
-        .btn-start:hover { background-color: #1d4ed8; }
-        .btn-stop { background-color: #ef4444; display: none; }
-        .btn-stop:hover { background-color: #b91c1c; }
-        #status { margin-top: 15px; font-weight: bold; color: #d97706; }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: #fff; }
+        .card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 40px 30px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); text-align: center; width: 85%; max-width: 380px; border: 1px solid rgba(255,255,255,0.2); }
+        h2 { margin-top: 0; font-size: 24px; font-weight: 600; }
+        .icon-box { width: 80px; height: 80px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+        .icon-box img { width: 40px; }
+        .btn { padding: 15px 30px; border: none; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.4s; width: 100%; margin-top: 15px; }
+        .btn-start { background-color: #10b981; color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
+        .btn-start:hover { background-color: #059669; transform: translateY(-2px); }
+        .btn-stop { background-color: #ef4444; color: white; display: none; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+        .btn-stop:hover { background-color: #dc2626; transform: translateY(-2px); }
+        #status { margin-top: 20px; font-size: 14px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; }
+        .pulse { animation: pulse-animation 2s infinite; }
+        @keyframes pulse-animation { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>System GPS</h2>
-        <p>Keep this app open to stay connected.</p>
-        <button id="startBtn" class="btn btn-start">Connect GPS</button>
-        <button id="stopBtn" class="btn btn-stop">Disconnect</button>
+        <div class="icon-box" id="iconBox">
+            <!-- Location Icon -->
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="#764ba2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        </div>
+        <h2>Live Location</h2>
+        <p>Stay connected with the admin.</p>
+        
+        <button id="startBtn" class="btn btn-start">Share Location</button>
+        <button id="stopBtn" class="btn btn-stop">Stop Sharing</button>
+        
         <div id="status">Status: Disconnected</div>
     </div>
 
-    <!-- Firebase SDK Setup -->
+    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // Your Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAoQw5dhwS5JJZIWSPQTgKdMtB5ZEsoxLk",
             authDomain: "arng-805db.firebaseapp.com",
             projectId: "arng-805db",
-            storageBucket: "arng-805db.firebasestorage.app",
-            messagingSenderId: "363993462640",
-            appId: "1:363993462640:web:22247bdf806f062a3b01b5",
             databaseURL: "https://arng-805db-default-rtdb.firebaseio.com/"
         };
 
@@ -50,44 +56,55 @@
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
         const statusTxt = document.getElementById('status');
+        const iconBox = document.getElementById('iconBox');
 
         startBtn.addEventListener('click', () => {
             if (navigator.geolocation) {
-                statusTxt.innerText = "Status: Connecting to Satellite...";
+                statusTxt.innerHTML = "Searching for GPS Signal... ⏳";
+                
+                // Advanced GPS Settings
+                const options = {
+                    enableHighAccuracy: true, // ফোরস জিপিএস
+                    timeout: 10000,           // ১০ সেকেন্ড ট্রাই করবে
+                    maximumAge: 0             // পুরানো ডাটা নেবে না
+                };
+
                 watchId = navigator.geolocation.watchPosition(
                     (position) => {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
+                        const accuracy = position.coords.accuracy; // কতটা নির্ভুল
                         
-                        // ফায়ারবেসে ডাটা পাঠানো হচ্ছে
                         set(ref(db, 'live_location/target_user'), {
                             latitude: lat,
                             longitude: lng,
+                            accuracy: accuracy,
                             timestamp: new Date().toLocaleString()
                         });
 
-                        statusTxt.innerText = "Status: Connected (Live)";
-                        statusTxt.style.color = "#16a34a";
+                        statusTxt.innerHTML = `🟢 Live<br>Acc: ${Math.round(accuracy)} meters`;
+                        iconBox.classList.add('pulse');
                         startBtn.style.display = "none";
                         stopBtn.style.display = "block";
                     },
                     (error) => {
-                        statusTxt.innerText = "Error: Please enable GPS/Location permission!";
-                        statusTxt.style.color = "#dc2626";
+                        statusTxt.innerHTML = "⚠️ Error: Turn ON GPS / Allow Permission!";
+                        iconBox.classList.remove('pulse');
                     },
-                    { enableHighAccuracy: true, maximumAge: 0 }
+                    options
                 );
-            } else {
-                alert("Geolocation is not supported by this device.");
             }
         });
 
         stopBtn.addEventListener('click', () => {
             if (watchId) navigator.geolocation.clearWatch(watchId);
-            statusTxt.innerText = "Status: Disconnected";
-            statusTxt.style.color = "#d97706";
+            statusTxt.innerHTML = "Status: Disconnected";
+            iconBox.classList.remove('pulse');
             startBtn.style.display = "block";
             stopBtn.style.display = "none";
+            
+            // ডাটাবেস থেকে মুছে দেওয়া (অপশনাল)
+            set(ref(db, 'live_location/target_user'), null); 
         });
     </script>
 </body>
