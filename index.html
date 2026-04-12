@@ -3,44 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Tracker Plus</title>
+    <title>Tracker Pro - User</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: #fff; }
-        .card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 40px 30px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); text-align: center; width: 85%; max-width: 380px; border: 1px solid rgba(255,255,255,0.2); }
-        h2 { margin-top: 0; font-size: 24px; font-weight: 600; }
-        .icon-box { width: 80px; height: 80px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
-        .icon-box img { width: 40px; }
-        .btn { padding: 15px 30px; border: none; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.4s; width: 100%; margin-top: 15px; }
-        .btn-start { background-color: #10b981; color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
-        .btn-start:hover { background-color: #059669; transform: translateY(-2px); }
-        .btn-stop { background-color: #ef4444; color: white; display: none; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
-        .btn-stop:hover { background-color: #dc2626; transform: translateY(-2px); }
-        #status { margin-top: 20px; font-size: 14px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; }
-        .pulse { animation: pulse-animation 2s infinite; }
-        @keyframes pulse-animation { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: #fff; overflow: hidden; }
+        .card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(15px); padding: 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 85%; max-width: 380px; border: 1px solid rgba(255,255,255,0.1); }
+        h2 { margin: 0 0 5px 0; color: #38bdf8; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .info-box { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; font-size: 13px; color: #94a3b8; }
+        .info-box span { display: block; font-size: 18px; font-weight: bold; color: #fff; margin-top: 5px; }
+        .btn { padding: 15px 30px; border: none; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px; }
+        .btn-start { background-color: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        .btn-stop { background-color: #64748b; color: white; display: none; }
+        .btn-sos { background-color: #ef4444; color: white; display: none; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.6); animation: pulse-red 2s infinite; margin-top: 20px; border: 2px solid #b91c1c; }
+        @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="icon-box" id="iconBox">
-            <!-- Location Icon -->
-            <svg viewBox="0 0 24 24" width="40" height="40" fill="#764ba2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        <h2>Live Tracker Pro</h2>
+        <p style="color: #64748b; font-size: 14px;">Secure Connection</p>
+        
+        <div class="info-grid">
+            <div class="info-box">Battery <span id="batTxt">--%</span></div>
+            <div class="info-box">Speed <span id="speedTxt">0 km/h</span></div>
         </div>
-        <h2>Live Location</h2>
-        <p>Stay connected with the admin.</p>
         
-        <button id="startBtn" class="btn btn-start">Share Location</button>
-        <button id="stopBtn" class="btn btn-stop">Stop Sharing</button>
+        <button id="startBtn" class="btn btn-start">Turn ON Location</button>
+        <button id="stopBtn" class="btn btn-stop">Turn OFF</button>
+        <button id="sosBtn" class="btn btn-sos">🆘 EMERGENCY SOS</button>
         
-        <div id="status">Status: Disconnected</div>
+        <div id="status" style="margin-top: 15px; font-size: 14px; color: #38bdf8;">Status: Waiting...</div>
     </div>
 
-    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAoQw5dhwS5JJZIWSPQTgKdMtB5ZEsoxLk",
@@ -51,60 +50,90 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const userRef = ref(db, 'live_location/target_user');
 
         let watchId = null;
+        let isSOS = false;
+        
+        // DOM Elements
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
+        const sosBtn = document.getElementById('sosBtn');
         const statusTxt = document.getElementById('status');
-        const iconBox = document.getElementById('iconBox');
+        const batTxt = document.getElementById('batTxt');
+        const speedTxt = document.getElementById('speedTxt');
+
+        // Get Battery Info
+        let batteryLevel = "Unknown";
+        let isCharging = false;
+        if (navigator.getBattery) {
+            navigator.getBattery().then(battery => {
+                updateBattery(battery);
+                battery.addEventListener('levelchange', () => updateBattery(battery));
+                battery.addEventListener('chargingchange', () => updateBattery(battery));
+            });
+        }
+        function updateBattery(b) {
+            batteryLevel = Math.round(b.level * 100);
+            isCharging = b.charging;
+            batTxt.innerText = `${batteryLevel}% ${isCharging ? '⚡' : ''}`;
+        }
+
+        // Handle SOS
+        sosBtn.addEventListener('click', () => {
+            isSOS = !isSOS;
+            sosBtn.innerText = isSOS ? "CANCEL SOS 🛑" : "🆘 EMERGENCY SOS";
+            sosBtn.style.backgroundColor = isSOS ? "#991b1b" : "#ef4444";
+        });
 
         startBtn.addEventListener('click', () => {
             if (navigator.geolocation) {
-                statusTxt.innerHTML = "Searching for GPS Signal... ⏳";
+                statusTxt.innerHTML = "Connecting...";
                 
-                // Advanced GPS Settings
-                const options = {
-                    enableHighAccuracy: true, // ফোরস জিপিএস
-                    timeout: 10000,           // ১০ সেকেন্ড ট্রাই করবে
-                    maximumAge: 0             // পুরানো ডাটা নেবে না
-                };
+                // Set offline status if user closes app
+                onDisconnect(userRef).update({ isOnline: false, status: "Offline" });
 
                 watchId = navigator.geolocation.watchPosition(
                     (position) => {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
-                        const accuracy = position.coords.accuracy; // কতটা নির্ভুল
+                        const acc = position.coords.accuracy;
+                        let speed = position.coords.speed; // Speed in m/s
+                        speed = speed ? Math.round(speed * 3.6) : 0; // Convert to km/h
                         
-                        set(ref(db, 'live_location/target_user'), {
+                        speedTxt.innerText = `${speed} km/h`;
+
+                        set(userRef, {
                             latitude: lat,
                             longitude: lng,
-                            accuracy: accuracy,
+                            accuracy: acc,
+                            speed: speed,
+                            battery: batteryLevel,
+                            charging: isCharging,
+                            sos: isSOS,
+                            isOnline: true,
                             timestamp: new Date().toLocaleString()
                         });
 
-                        statusTxt.innerHTML = `🟢 Live<br>Acc: ${Math.round(accuracy)} meters`;
-                        iconBox.classList.add('pulse');
+                        statusTxt.innerHTML = `🟢 Transmitting Live`;
                         startBtn.style.display = "none";
                         stopBtn.style.display = "block";
+                        sosBtn.style.display = "block";
                     },
-                    (error) => {
-                        statusTxt.innerHTML = "⚠️ Error: Turn ON GPS / Allow Permission!";
-                        iconBox.classList.remove('pulse');
-                    },
-                    options
+                    (error) => { statusTxt.innerHTML = "⚠️ Allow Location Permission!"; },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
             }
         });
 
         stopBtn.addEventListener('click', () => {
             if (watchId) navigator.geolocation.clearWatch(watchId);
+            set(userRef, { isOnline: false, timestamp: new Date().toLocaleString() }); // Mark offline
             statusTxt.innerHTML = "Status: Disconnected";
-            iconBox.classList.remove('pulse');
             startBtn.style.display = "block";
             stopBtn.style.display = "none";
-            
-            // ডাটাবেস থেকে মুছে দেওয়া (অপশনাল)
-            set(ref(db, 'live_location/target_user'), null); 
+            sosBtn.style.display = "none";
+            isSOS = false;
         });
     </script>
 </body>
