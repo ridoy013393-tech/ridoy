@@ -3,27 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker Pro - User</title>
+    <title>Tracker Pro - Ultimate User</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
         body { font-family: 'Poppins', sans-serif; background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: #fff; overflow: hidden; }
-        .card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(15px); padding: 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 85%; max-width: 380px; border: 1px solid rgba(255,255,255,0.1); }
+        .card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(15px); padding: 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 85%; max-width: 380px; border: 1px solid rgba(255,255,255,0.1); position: relative;}
         h2 { margin: 0 0 5px 0; color: #38bdf8; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .info-box { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; font-size: 13px; color: #94a3b8; }
         .info-box span { display: block; font-size: 18px; font-weight: bold; color: #fff; margin-top: 5px; }
         .btn { padding: 15px 30px; border: none; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px; }
-        .btn-start { background-color: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        .btn-start { background-color: #3b82f6; color: white; }
         .btn-stop { background-color: #64748b; color: white; display: none; }
-        .btn-sos { background-color: #ef4444; color: white; display: none; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.6); animation: pulse-red 2s infinite; margin-top: 20px; border: 2px solid #b91c1c; }
-        @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); } 100% { transform: scale(1); } }
+        .btn-sos { background-color: #ef4444; color: white; display: none; margin-top: 20px; animation: pulse-red 2s infinite;}
+        @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
+        /* Chat Box Pop-up */
+        #chatBox { display: none; background: #fbbf24; color: #000; padding: 15px; border-radius: 15px; margin-top: 20px; font-weight: bold; box-shadow: 0 5px 15px rgba(251, 191, 36, 0.4); animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div class="card">
         <h2>Live Tracker Pro</h2>
-        <p style="color: #64748b; font-size: 14px;">Secure Connection</p>
+        <p style="color: #64748b; font-size: 14px;">Ultimate Secure Connection</p>
         
         <div class="info-grid">
             <div class="info-box">Battery <span id="batTxt">--%</span></div>
@@ -33,13 +37,14 @@
         <button id="startBtn" class="btn btn-start">Turn ON Location</button>
         <button id="stopBtn" class="btn btn-stop">Turn OFF</button>
         <button id="sosBtn" class="btn btn-sos">🆘 EMERGENCY SOS</button>
-        
+
+        <div id="chatBox">🔔 Message: <span id="msgText"></span></div>
         <div id="status" style="margin-top: 15px; font-size: 14px; color: #38bdf8;">Status: Waiting...</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAoQw5dhwS5JJZIWSPQTgKdMtB5ZEsoxLk",
@@ -51,74 +56,52 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const userRef = ref(db, 'live_location/target_user');
+        const chatRef = ref(db, 'live_location/chat');
 
-        let watchId = null;
-        let isSOS = false;
-        
-        // DOM Elements
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const sosBtn = document.getElementById('sosBtn');
-        const statusTxt = document.getElementById('status');
-        const batTxt = document.getElementById('batTxt');
-        const speedTxt = document.getElementById('speedTxt');
+        let watchId = null; let isSOS = false;
+        const startBtn = document.getElementById('startBtn'), stopBtn = document.getElementById('stopBtn'), sosBtn = document.getElementById('sosBtn');
+        const statusTxt = document.getElementById('status'), batTxt = document.getElementById('batTxt'), speedTxt = document.getElementById('speedTxt');
+        const chatBox = document.getElementById('chatBox'), msgText = document.getElementById('msgText');
 
-        // Get Battery Info
-        let batteryLevel = "Unknown";
-        let isCharging = false;
+        // Listen for Admin Messages
+        onValue(chatRef, (snapshot) => {
+            const data = snapshot.val();
+            if(data && data.message) {
+                msgText.innerText = data.message;
+                chatBox.style.display = "block";
+                // Play a small beep sound for message
+                let beep = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                beep.play().catch(e=>{});
+                setTimeout(() => { chatBox.style.display = "none"; }, 10000); // Hide after 10s
+            }
+        });
+
+        // Battery Info
+        let batteryLevel = "Unknown", isCharging = false;
         if (navigator.getBattery) {
-            navigator.getBattery().then(battery => {
-                updateBattery(battery);
-                battery.addEventListener('levelchange', () => updateBattery(battery));
-                battery.addEventListener('chargingchange', () => updateBattery(battery));
+            navigator.getBattery().then(b => {
+                updateBattery(b); b.addEventListener('levelchange', () => updateBattery(b)); b.addEventListener('chargingchange', () => updateBattery(b));
             });
         }
-        function updateBattery(b) {
-            batteryLevel = Math.round(b.level * 100);
-            isCharging = b.charging;
-            batTxt.innerText = `${batteryLevel}% ${isCharging ? '⚡' : ''}`;
-        }
+        function updateBattery(b) { batteryLevel = Math.round(b.level * 100); isCharging = b.charging; batTxt.innerText = `${batteryLevel}% ${isCharging ? '⚡' : ''}`; }
 
-        // Handle SOS
-        sosBtn.addEventListener('click', () => {
-            isSOS = !isSOS;
-            sosBtn.innerText = isSOS ? "CANCEL SOS 🛑" : "🆘 EMERGENCY SOS";
-            sosBtn.style.backgroundColor = isSOS ? "#991b1b" : "#ef4444";
-        });
+        sosBtn.addEventListener('click', () => { isSOS = !isSOS; sosBtn.innerText = isSOS ? "CANCEL SOS 🛑" : "🆘 EMERGENCY SOS"; });
 
         startBtn.addEventListener('click', () => {
             if (navigator.geolocation) {
                 statusTxt.innerHTML = "Connecting...";
-                
-                // Set offline status if user closes app
                 onDisconnect(userRef).update({ isOnline: false, status: "Offline" });
 
                 watchId = navigator.geolocation.watchPosition(
                     (position) => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        const acc = position.coords.accuracy;
-                        let speed = position.coords.speed; // Speed in m/s
-                        speed = speed ? Math.round(speed * 3.6) : 0; // Convert to km/h
-                        
+                        const lat = position.coords.latitude, lng = position.coords.longitude, acc = position.coords.accuracy;
+                        let speed = position.coords.speed; speed = speed ? Math.round(speed * 3.6) : 0;
                         speedTxt.innerText = `${speed} km/h`;
 
-                        set(userRef, {
-                            latitude: lat,
-                            longitude: lng,
-                            accuracy: acc,
-                            speed: speed,
-                            battery: batteryLevel,
-                            charging: isCharging,
-                            sos: isSOS,
-                            isOnline: true,
-                            timestamp: new Date().toLocaleString()
-                        });
+                        set(userRef, { latitude: lat, longitude: lng, accuracy: acc, speed: speed, battery: batteryLevel, charging: isCharging, sos: isSOS, isOnline: true, timestamp: new Date().toLocaleString() });
 
                         statusTxt.innerHTML = `🟢 Transmitting Live`;
-                        startBtn.style.display = "none";
-                        stopBtn.style.display = "block";
-                        sosBtn.style.display = "block";
+                        startBtn.style.display = "none"; stopBtn.style.display = "block"; sosBtn.style.display = "block";
                     },
                     (error) => { statusTxt.innerHTML = "⚠️ Allow Location Permission!"; },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -128,12 +111,8 @@
 
         stopBtn.addEventListener('click', () => {
             if (watchId) navigator.geolocation.clearWatch(watchId);
-            set(userRef, { isOnline: false, timestamp: new Date().toLocaleString() }); // Mark offline
-            statusTxt.innerHTML = "Status: Disconnected";
-            startBtn.style.display = "block";
-            stopBtn.style.display = "none";
-            sosBtn.style.display = "none";
-            isSOS = false;
+            set(userRef, { isOnline: false, timestamp: new Date().toLocaleString() });
+            statusTxt.innerHTML = "Disconnected"; startBtn.style.display = "block"; stopBtn.style.display = "none"; sosBtn.style.display = "none"; isSOS = false;
         });
     </script>
 </body>
