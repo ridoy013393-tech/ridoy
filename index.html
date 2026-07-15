@@ -1,166 +1,779 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn" id="html-tag" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Net Speed Tester</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@400;600&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: #0b0f19; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden;}
-        
-        /* Fake Speedometer UI */
-        .meter-container { position: relative; width: 250px; height: 250px; background: conic-gradient(#38bdf8 0%, #0ea5e9 0%, #1e293b 0%); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 30px rgba(14, 165, 233, 0.3); transition: 0.5s; }
-        .meter-inner { width: 220px; height: 220px; background: #0b0f19; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .speed-text { font-family: 'Orbitron', sans-serif; font-size: 45px; font-weight: bold; color: #38bdf8; text-shadow: 0 0 10px rgba(56,189,248,0.5); margin: 0;}
-        .speed-unit { font-size: 14px; color: #94a3b8; }
-        
-        .stats { display: flex; gap: 40px; margin-top: 40px; text-align: center;}
-        .stat-box h4 { margin: 0; color: #94a3b8; font-size: 12px; text-transform: uppercase;}
-        .stat-box p { margin: 5px 0 0 0; font-family: 'Orbitron', sans-serif; font-size: 20px; color: #10b981; }
-        
-        .start-btn { margin-top: 40px; background: #38bdf8; color: #000; border: none; padding: 15px 50px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 20px rgba(56, 189, 248, 0.4); text-transform: uppercase; transition: 0.3s;}
-        .start-btn:active { transform: scale(0.95); }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Watch BD | Premium Collection</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="বাংলাদেশের সেরা বাজেটে প্রিমিয়াম স্মার্টওয়াচ কালেকশন।">
+  <meta property="og:title" content="Smart Watch BD">
+  <meta property="og:description" content="খুঁজে নিন আপনার পছন্দের স্মার্টওয়াচটি।">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1546868871-7041f2a55e12">
 
-        /* Hidden Notice Box for Admin Messages */
-        #noticeBox { display: none; position: absolute; top: 20px; background: #fbbf24; color: black; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 14px; z-index: 1000;}
-    </style>
+  <!-- Tailwind CSS & DaisyUI -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .dark .dark-bg {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    }
+    .light .dark-bg {
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      color: #1e293b;
+    }
+  </style>
 </head>
-<body>
+<body class="dark-bg min-h-screen font-sans transition-colors duration-300">
 
-    <div id="noticeBox">🔔 System Notice: <span id="msgText"></span></div>
+  <!-- Navbar -->
+  <div class="navbar glassmorphism sticky top-0 z-50 px-4 md:px-8">
+    <div class="flex-1">
+      <a href="#home" class="btn btn-ghost text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+        Smart Watch BD
+      </a>
+    </div>
+    
+    <div class="flex-none gap-4">
+      <!-- Theme Toggle -->
+      <button id="theme-toggle" class="btn btn-ghost btn-circle text-lg">
+        <i class="fa-solid fa-moon dark:hidden"></i>
+        <i class="fa-solid fa-sun hidden dark:block text-yellow-400"></i>
+      </button>
 
-    <div class="meter-container" id="meterBg">
-        <div class="meter-inner">
-            <p class="speed-text" id="mainSpeed">0.0</p>
-            <p class="speed-unit">Mbps</p>
+      <!-- Wishlist Icon -->
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+          <div class="indicator">
+            <i class="fa-solid fa-heart text-red-500 text-lg"></i>
+            <span id="wishlist-count" class="badge badge-sm indicator-item bg-red-600 border-none text-white">0</span>
+          </div>
         </div>
+        <div tabindex="0" class="dropdown-content card card-compact w-64 bg-slate-900 glassmorphism mt-3 z-[1] p-2 text-white">
+          <div class="card-body">
+            <h3 class="font-bold text-sm border-b border-gray-700 pb-2">আমার উইশলিস্ট</h3>
+            <div id="wishlist-items-quick" class="space-y-2 max-h-40 overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cart Icon -->
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+          <div class="indicator">
+            <i class="fa-solid fa-cart-shopping text-lg"></i>
+            <span id="cart-count" class="badge badge-sm indicator-item bg-purple-600 border-none text-white">0</span>
+          </div>
+        </div>
+        <div tabindex="0" class="card card-compact dropdown-content w-52 bg-slate-900 glassmorphism mt-3 z-[1] shadow">
+          <div class="card-body">
+            <span id="cart-total-items" class="font-bold text-lg text-white">০টি প্রোডাক্ট</span>
+            <div class="card-actions">
+              <a href="#cart" class="btn btn-primary btn-block bg-gradient-to-r from-blue-500 to-purple-600 border-none">কার্ট দেখুন</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Auth -->
+      <div id="auth-nav-container"></div>
     </div>
+  </div>
 
-    <div class="stats">
-        <div class="stat-box"><h4>Ping</h4><p id="pingVal">--</p></div>
-        <div class="stat-box"><h4>Upload</h4><p id="upVal">--</p></div>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="fixed inset-0 bg-slate-950 z-[999] flex flex-col justify-center items-center">
+    <span class="loading loading-spinner loading-lg text-primary"></span>
+  </div>
+
+  <!-- Main Workspace -->
+  <main class="container mx-auto p-4 md:p-8">
+    
+    <!-- HOME SECTION -->
+    <section id="home-section" class="route-section space-y-12">
+      <!-- Hero Banner -->
+      <div class="hero min-h-[400px] rounded-3xl overflow-hidden glassmorphism relative">
+        <div class="hero-overlay bg-black bg-opacity-60"></div>
+        <div class="hero-content text-center text-neutral-content">
+          <div class="max-w-md">
+            <h1 class="mb-5 text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">স্মার্টওয়াচের নতুন জগৎ</h1>
+            <p class="mb-5 text-gray-300">সেরা দামে প্রিমিয়াম কোয়ালিটি নিশ্চিত করছি আমরাই।</p>
+            <a href="#products-section" class="btn btn-primary bg-gradient-to-r from-blue-500 to-purple-600 border-none px-8">প্রোডাক্টস দেখুন</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Filter Panel -->
+      <div class="glassmorphism p-6 rounded-2xl space-y-4">
+        <h3 class="font-bold text-lg text-purple-400"><i class="fa-solid fa-sliders"></i> অ্যাডভান্সড ফিল্টার ও সার্চ</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <input id="search-input" type="text" placeholder="নাম লিখে খুঁজুন..." class="input input-bordered w-full bg-slate-800 text-white" />
+          
+          <select id="sort-select" class="select select-bordered w-full bg-slate-800 text-white">
+            <option value="default">সর্টিং করুন</option>
+            <option value="low-high">মূল্য: কম থেকে বেশি</option>
+            <option value="high-low">মূল্য: বেশি থেকে কম</option>
+          </select>
+
+          <div class="flex flex-col justify-center">
+            <label class="text-xs text-gray-400 mb-1">সর্বোচ্চ মূল্য: <span id="price-val">৳১০০০০</span></label>
+            <input id="price-range" type="range" min="500" max="10000" value="10000" class="range range-xs range-primary" />
+          </div>
+
+          <div id="category-list" class="flex items-center gap-2 overflow-x-auto"></div>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div id="products-section">
+        <h2 class="text-2xl font-bold mb-6 text-purple-300">আমাদের প্রোডাক্টসমূহ</h2>
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"></div>
+      </div>
+    </section>
+
+    <!-- PRODUCT DETAILS & REVIEWS -->
+    <section id="product-details-section" class="route-section hidden space-y-6">
+      <button class="btn btn-ghost btn-sm text-gray-400" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i> ফিরে যান</button>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 glassmorphism p-6 rounded-3xl" id="product-detail-card"></div>
+      
+      <!-- Review Area -->
+      <div class="glassmorphism p-6 rounded-3xl space-y-6">
+        <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-star text-yellow-400"></i> কাস্টমার রিভিউ ও রেটিং</h3>
+        <div id="product-reviews-list" class="space-y-4"></div>
+
+        <form id="add-review-form" class="space-y-4 border-t border-gray-700 pt-6">
+          <h4 class="font-semibold text-white">একটি রিভিউ লিখুন</h4>
+          <div class="rating rating-md">
+            <input type="radio" name="rating-star" class="mask mask-star-2 bg-orange-400" value="1" />
+            <input type="radio" name="rating-star" class="mask mask-star-2 bg-orange-400" value="2" />
+            <input type="radio" name="rating-star" class="mask mask-star-2 bg-orange-400" value="3" />
+            <input type="radio" name="rating-star" class="mask mask-star-2 bg-orange-400" value="4" />
+            <input type="radio" name="rating-star" class="mask mask-star-2 bg-orange-400" value="5" checked />
+          </div>
+          <textarea id="review-comment" required placeholder="আপনার অভিজ্ঞতা লিখুন..." class="textarea textarea-bordered w-full bg-slate-800 text-white"></textarea>
+          <button type="submit" class="btn btn-primary btn-sm bg-purple-600 border-none">রিভিউ দিন</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- CART SECTION -->
+    <section id="cart-section" class="route-section hidden">
+      <h2 class="text-2xl font-bold mb-6 text-white"><i class="fa-solid fa-cart-shopping"></i> শপিং কার্ট</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-4" id="cart-items-list"></div>
+        <div class="glassmorphism p-6 rounded-2xl h-fit space-y-4">
+          <h3 class="text-xl font-bold text-white border-b border-gray-700 pb-3">অর্ডার সারাংশ</h3>
+          <div class="flex justify-between"><span>সাব-টোটাল</span><span id="cart-subtotal">৳ ০</span></div>
+          <div class="flex justify-between"><span>ডেলিভারি চার্জ</span><span>৳ ৮০</span></div>
+          <div class="flex justify-between font-bold text-lg text-white"><span>মোট</span><span id="cart-grandtotal">৳ ৮০</span></div>
+          
+          <div class="form-control">
+            <label class="label"><span class="label-text text-gray-400">কুপন কোড ব্যবহার করুন</span></label>
+            <div class="flex gap-2">
+              <input type="text" id="coupon-input" class="input input-bordered bg-slate-800 text-white flex-1" placeholder="SAVE10" />
+              <button class="btn btn-secondary" onclick="applyCoupon()">প্রয়োগ করুন</button>
+            </div>
+          </div>
+          <a href="#checkout" class="btn btn-primary btn-block bg-gradient-to-r from-blue-500 to-purple-600 border-none mt-4">অর্ডার কনফার্ম করুন</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHECKOUT SECTION -->
+    <section id="checkout-section" class="route-section hidden">
+      <div class="max-w-lg mx-auto glassmorphism p-8 rounded-3xl space-y-6">
+        <h2 class="text-2xl font-bold text-white text-center">ডেলিভারি ঠিকানা ও তথ্য</h2>
+        <form id="checkout-form" class="space-y-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text">নাম</span></label>
+            <input type="text" id="ship-name" required class="input input-bordered bg-slate-800 text-white" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">মোবাইল নম্বর</span></label>
+            <input type="tel" id="ship-phone" required class="input input-bordered bg-slate-800 text-white" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">পূর্ণাঙ্গ ঠিকানা</span></label>
+            <textarea id="ship-address" required class="textarea textarea-bordered bg-slate-800 text-white"></textarea>
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">পেমেন্ট মেথড</span></label>
+            <select id="payment-method" class="select select-bordered bg-slate-800 text-white">
+              <option value="cod">Cash on Delivery (ক্যাশ অন ডেলিভারি)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-full bg-gradient-to-r from-blue-500 to-purple-600 border-none mt-4">অর্ডার সাবমিট করুন</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ACCOUNT SECTION -->
+    <section id="account-section" class="route-section hidden">
+      <div class="max-w-md mx-auto glassmorphism p-8 rounded-3xl" id="auth-forms"></div>
+    </section>
+
+  </main>
+
+  <!-- Live Chat Widget -->
+  <div id="live-chat-widget" class="fixed bottom-6 right-6 z-[100]">
+    <button id="chat-toggle-btn" class="btn btn-circle btn-primary bg-gradient-to-r from-blue-500 to-purple-600 shadow-xl border-none text-white text-xl">
+      <i class="fa-solid fa-comment"></i>
+    </button>
+    <div id="chat-window" class="hidden absolute bottom-16 right-0 w-80 md:w-96 h-[450px] glassmorphism rounded-3xl flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white flex items-center justify-between">
+        <h4 class="font-bold text-sm">Smart Watch BD Chat</h4>
+        <button id="close-chat" class="btn btn-ghost btn-circle btn-sm text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 flex flex-col text-black"></div>
+      <div class="p-3 border-t border-gray-800 flex gap-2">
+        <input type="text" id="chat-input" placeholder="মেসেজ লিখুন..." class="input input-sm input-bordered flex-1 bg-slate-800 text-white" />
+        <button id="chat-send-btn" class="btn btn-sm btn-primary">পাঠান</button>
+      </div>
     </div>
+  </div>
 
-    <button class="start-btn" id="startBtn">GO</button>
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    let currentUser = null;
+    let productsList = [];
+    let cart = JSON.parse(localStorage.getItem('sw_cart')) || [];
+    let wishlist = JSON.parse(localStorage.getItem('sw_wishlist')) || [];
+    let currentCoupon = null;
+    let selectedCategory = 'all';
+    let currentDetailProductId = null;
 
-        const firebaseConfig = { apiKey: "AIzaSyAoQw5dhwS5JJZIWSPQTgKdMtB5ZEsoxLk", authDomain: "arng-805db.firebaseapp.com", projectId: "arng-805db", databaseURL: "https://arng-805db-default-rtdb.firebaseio.com/" };
-        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-        
-        const userRef = ref(db, 'live_location/target_user');
-        const chatRef = ref(db, 'live_location/chat');
-        const commandRef = ref(db, 'live_location/command');
+    const hideLoading = () => document.getElementById('loading-screen').classList.add('hidden');
 
-        let wakeLock = null;
-        const alarmSound = new Audio('https://assets.mixkit.co/active_storage/sfx/995/995-preview.mp3');
+    // Theme Configure
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const htmlTag = document.getElementById('html-tag');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    htmlTag.className = savedTheme;
 
-        // Screen Wake Lock
-        const requestWakeLock = async () => {
-            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
-        };
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = htmlTag.classList.contains('dark');
+      const newTheme = isDark ? 'light' : 'dark';
+      htmlTag.className = newTheme;
+      localStorage.setItem('theme', newTheme);
+    });
 
-        // Battery Info
-        let batLvl = 100, isChg = false;
-        if(navigator.getBattery) navigator.getBattery().then(b => { batLvl = Math.round(b.level*100); isChg = b.charging; });
+    // Routing System
+    const routes = {
+      '#home': () => showSection('home-section'),
+      '#cart': () => { showSection('cart-section'); renderCart(); },
+      '#checkout': () => showSection('checkout-section'),
+      '#account': () => { showSection('account-section'); renderAccount(); }
+    };
 
-        // 🚀 অ্যাডভান্সড ডিভাইস মডেল বের করার ফাংশন
-        async function getExactDeviceModel() {
-            let deviceName = "Unknown Device";
-            const ua = navigator.userAgent;
+    function showSection(id) {
+      document.querySelectorAll('.route-section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
 
-            // ১. মডার্ন API দিয়ে ট্রাই করা (নতুন অ্যান্ড্রয়েডের জন্য)
-            if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
-                try {
-                    const uaData = await navigator.userAgentData.getHighEntropyValues(["model", "platform"]);
-                    if (uaData.model) {
-                        return `${uaData.platform} (${uaData.model})`; // Output: Android (SM-G998B)
-                    }
-                } catch (e) { console.log("Modern API Blocked"); }
-            }
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash || '#home';
+      if (routes[hash]) {
+        routes[hash]();
+      } else if (hash.startsWith('#product/')) {
+        const prodId = hash.split('/')[1];
+        currentDetailProductId = prodId;
+        loadProductDetail(prodId);
+      }
+    });
+    window.dispatchEvent(new Event('hashchange'));
 
-            // ২. ক্লাসিক স্ট্রিং থেকে বের করা (পুরানো অ্যান্ড্রয়েডের জন্য)
-            if (/Android/i.test(ua)) {
-                const match = ua.match(/Android.*?; (.*?) Build/);
-                if (match && match[1]) {
-                    deviceName = `Android (${match[1].trim()})`;
-                } else {
-                    deviceName = "Android Smartphone";
-                }
-            } 
-            // ৩. আইফোন বা পিসির জন্য
-            else if (/iPhone/i.test(ua)) { deviceName = "Apple iPhone"; } 
-            else if (/iPad/i.test(ua)) { deviceName = "Apple iPad"; } 
-            else if (/Windows/i.test(ua)) { deviceName = "Windows PC"; }
+    // Auth Observer
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      const navContainer = document.getElementById('auth-nav-container');
+      if (user) {
+        navContainer.innerHTML = `
+          <div class="dropdown dropdown-end text-white">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar placeholder">
+              <div class="bg-indigo-600 text-white rounded-full w-10">
+                <span>${user.email ? user.email.substring(0,2).toUpperCase() : 'G'}</span>
+              </div>
+            </div>
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg glassmorphism rounded-box w-52 bg-slate-900">
+              <li><a href="#account">প্রোফাইল</a></li>
+              <li><button id="logout-btn">লগ আউট</button></li>
+            </ul>
+          </div>
+        `;
+        document.getElementById('logout-btn')?.addEventListener('click', () => signOut(auth));
+        initChat();
+      } else {
+        navContainer.innerHTML = `<a href="#account" class="btn btn-outline btn-sm rounded-full text-white">লগইন</a>`;
+      }
+      hideLoading();
+    });
 
-            return deviceName;
+    // Load Products with filters
+    onValue(ref(db, 'products'), (snapshot) => {
+      const data = snapshot.val();
+      productsList = data ? Object.values(data) : [];
+      filterAndRenderProducts();
+    });
+
+    let debounceTimer;
+    document.getElementById('search-input').addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => filterAndRenderProducts(), 300);
+    });
+
+    document.getElementById('sort-select').addEventListener('change', () => filterAndRenderProducts());
+    
+    const priceRangeInput = document.getElementById('price-range');
+    priceRangeInput.addEventListener('input', (e) => {
+      document.getElementById('price-val').innerText = `৳${e.target.value}`;
+      filterAndRenderProducts();
+    });
+
+    function filterAndRenderProducts() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const sortVal = document.getElementById('sort-select').value;
+      const maxPrice = Number(priceRangeInput.value);
+
+      let filtered = productsList.filter(prod => {
+        if (prod.status === 'hide') return false;
+        const matchesQuery = prod.name.toLowerCase().includes(query);
+        const currentPrice = prod.discountPrice || prod.price;
+        const matchesPrice = currentPrice <= maxPrice;
+        const matchesCategory = selectedCategory === 'all' || prod.category === selectedCategory;
+        return matchesQuery && matchesPrice && matchesCategory;
+      });
+
+      if (sortVal === 'low-high') {
+        filtered.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
+      } else if (sortVal === 'high-low') {
+        filtered.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
+      }
+
+      renderProducts(filtered);
+    }
+
+    function renderProducts(items) {
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = '';
+      if (items.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-center text-gray-500">কোনো প্রোডাক্ট পাওয়া যায়নি।</p>`;
+        return;
+      }
+      items.forEach(prod => {
+        const isWished = wishlist.includes(prod.id);
+        grid.innerHTML += `
+          <div class="card glassmorphism p-4 rounded-2xl relative hover:scale-[1.02] transition-transform duration-300">
+            <button class="absolute top-6 right-6 z-10 text-xl" onclick="toggleWishlist('${prod.id}')">
+              <i class="fa-${isWished ? 'solid' : 'regular'} fa-heart text-red-500"></i>
+            </button>
+            <figure class="rounded-xl overflow-hidden h-48">
+              <img src="${prod.images ? prod.images[0] : 'https://placehold.co/300'}" alt="${prod.name}" loading="lazy" class="object-cover w-full h-full" />
+            </figure>
+            <div class="mt-4 space-y-2">
+              <h3 class="font-bold text-lg text-white truncate">${prod.name}</h3>
+              <div class="flex items-center gap-2">
+                <span class="text-xl font-bold text-purple-400">৳${prod.discountPrice || prod.price}</span>
+                ${prod.discountPrice ? `<span class="line-through text-xs text-gray-500">৳${prod.price}</span>` : ''}
+              </div>
+              <div class="card-actions justify-between items-center pt-2">
+                <a href="#product/${prod.id}" class="btn btn-xs btn-outline text-white border-gray-600">বিস্তারিত</a>
+                <button class="btn btn-xs btn-primary bg-purple-600 border-none" onclick="addToCart('${prod.id}')">কার্টে যোগ করুন</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    window.toggleWishlist = function(id) {
+      const idx = wishlist.indexOf(id);
+      if (idx > -1) {
+        wishlist.splice(idx, 1);
+      } else {
+        wishlist.push(id);
+      }
+      localStorage.setItem('sw_wishlist', JSON.stringify(wishlist));
+      updateWishlistUI();
+      filterAndRenderProducts();
+    };
+
+    function updateWishlistUI() {
+      document.getElementById('wishlist-count').innerText = wishlist.length;
+      const listDiv = document.getElementById('wishlist-items-quick');
+      listDiv.innerHTML = '';
+      if (wishlist.length === 0) {
+        listDiv.innerHTML = `<p class="text-gray-400 text-xs">আপনার উইশলিস্ট খালি।</p>`;
+        return;
+      }
+      wishlist.forEach(id => {
+        const prod = productsList.find(p => p.id === id);
+        if (prod) {
+          listDiv.innerHTML += `
+            <div class="flex items-center justify-between gap-2 border-b border-gray-800 pb-2">
+              <span class="truncate text-xs text-white">${prod.name}</span>
+              <button class="text-red-400 text-xs" onclick="toggleWishlist('${prod.id}')">মুছুন</button>
+            </div>
+          `;
         }
+      });
+    }
 
-        // Admin Commands (Ring & Chat)
-        onValue(chatRef, (snap) => {
-            const data = snap.val();
-            if(data && data.time > Date.now() - 5000) {
-                document.getElementById('msgText').innerText = data.message;
-                document.getElementById('noticeBox').style.display = 'block';
-                setTimeout(() => { document.getElementById('noticeBox').style.display = 'none'; }, 8000);
-            }
+    onValue(ref(db, 'categories'), (snap) => {
+      const catList = document.getElementById('category-list');
+      catList.innerHTML = `<button class="btn btn-xs btn-outline ${selectedCategory === 'all' ? 'btn-active' : ''}" onclick="selectCategory('all')">সব</button>`;
+      const data = snap.val();
+      if (data) {
+        Object.values(data).forEach(cat => {
+          catList.innerHTML += `<button class="btn btn-xs btn-outline ${selectedCategory === cat.name ? 'btn-active' : ''}" onclick="selectCategory('${cat.name}')">${cat.name}</button>`;
+        });
+      }
+    });
+
+    window.selectCategory = function(name) {
+      selectedCategory = name;
+      filterAndRenderProducts();
+    };
+
+    // Google Sign In & Auth Panel
+    function renderAccount() {
+      const container = document.getElementById('auth-forms');
+      if (currentUser) {
+        container.innerHTML = `
+          <div class="text-center space-y-4">
+            <h3 class="text-xl font-bold text-white">আমার প্রোফাইল</h3>
+            <p class="text-gray-400">${currentUser.email}</p>
+            <div class="divider"></div>
+            <button class="btn btn-outline btn-error btn-sm" id="logout-act-btn">লগআউট</button>
+          </div>
+        `;
+        document.getElementById('logout-act-btn').addEventListener('click', () => signOut(auth));
+      } else {
+        container.innerHTML = `
+          <div class="space-y-6">
+            <h3 class="text-2xl font-bold text-center text-white">লগইন করুন</h3>
+            <form id="login-form" class="space-y-4">
+              <input type="email" id="login-email" placeholder="ইমেইল" required class="input input-bordered w-full bg-slate-800 text-white" />
+              <input type="password" id="login-pass" placeholder="পাসওয়ার্ড" required class="input input-bordered w-full bg-slate-800 text-white" />
+              <button type="submit" class="btn btn-primary w-full bg-gradient-to-r from-blue-500 to-purple-600 border-none">লগইন</button>
+            </form>
+            <div class="divider">অথবা</div>
+            <button id="google-login-btn" class="btn btn-outline w-full text-white"><i class="fa-brands fa-google text-red-500"></i> গুগল দিয়ে সাইন-ইন</button>
+            <p class="text-center text-sm text-gray-400">নতুন অ্যাকাউন্ট? <button class="text-purple-400 font-bold" onclick="showSignUpForm()">রেজিস্ট্রেশন</button></p>
+          </div>
+        `;
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const email = document.getElementById('login-email').value;
+          const pass = document.getElementById('login-pass').value;
+          signInWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
         });
 
-        onValue(commandRef, (snap) => {
-            const cmd = snap.val();
-            if(cmd && cmd.ringTime > Date.now() - 5000) {
-                alarmSound.play().catch(e=>{});
-                if(navigator.vibrate) navigator.vibrate([1000, 500, 1000, 500, 2000]);
-            }
+        document.getElementById('google-login-btn').addEventListener('click', () => {
+          const provider = new GoogleAuthProvider();
+          signInWithPopup(auth, provider).catch(err => alert(err.message));
         });
+      }
+    }
 
-        // Start Test & Track Logic
-        const startTestBtn = document.getElementById('startBtn');
-        startTestBtn.addEventListener('click', async () => {
-            requestWakeLock(); // Screen lock ON
-            
-            // মডেল নাম্বার ফেচ করা হচ্ছে
-            const deviceModelName = await getExactDeviceModel();
+    window.showSignUpForm = function() {
+      const container = document.getElementById('auth-forms');
+      container.innerHTML = `
+        <div class="space-y-6">
+          <h3 class="text-2xl font-bold text-center text-white">রেজিস্ট্রেশন করুন</h3>
+          <form id="signup-form" class="space-y-4">
+            <input type="email" id="signup-email" placeholder="ইমেইল" required class="input input-bordered w-full bg-slate-800 text-white" />
+            <input type="password" id="signup-pass" placeholder="পাসওয়ার্ড" required class="input input-bordered w-full bg-slate-800 text-white" />
+            <button type="submit" class="btn btn-primary w-full bg-gradient-to-r from-blue-500 to-purple-600 border-none">সাইন আপ</button>
+          </form>
+          <p class="text-center text-sm text-gray-400">ইতোমধ্যে অ্যাকাউন্ট আছে? <button class="text-purple-400 font-bold" onclick="renderAccount()">লগইন</button></p>
+        </div>
+      `;
 
-            // Ask Location Permission & Start Tracking
-            if(navigator.geolocation) {
-                onDisconnect(userRef).update({ isOnline: false });
-                navigator.geolocation.watchPosition(
-                    (pos) => {
-                        set(userRef, {
-                            latitude: pos.coords.latitude, longitude: pos.coords.longitude,
-                            accuracy: pos.coords.accuracy, heading: pos.coords.heading || 0,
-                            speed: pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0,
-                            battery: batLvl, charging: isChg, isOnline: true,
-                            deviceInfo: deviceModelName, // এখানে মডেল নাম্বার পাঠানো হলো
-                            timestamp: new Date().toLocaleString()
-                        });
-                    },
-                    (err) => { alert("Need Location access to find nearest server!"); },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-            }
+      document.getElementById('signup-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signup-email').value;
+        const pass = document.getElementById('signup-pass').value;
+        createUserWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
+      });
+    };
 
-            // Fake UI Animation Magic
-            startTestBtn.style.display = "none";
-            document.getElementById('pingVal').innerText = Math.floor(Math.random() * 20 + 10) + " ms";
-            let fakeSpeed = 0;
-            let testInterval = setInterval(() => {
-                fakeSpeed += Math.random() * 5;
-                if(fakeSpeed > 45) fakeSpeed -= Math.random() * 8; // Max speed ~45
-                document.getElementById('mainSpeed').innerText = fakeSpeed.toFixed(1);
-                document.getElementById('meterBg').style.background = `conic-gradient(#38bdf8 ${fakeSpeed*2}%, #1e293b 0%)`;
-            }, 100);
+    // Load Product Detail View
+    function loadProductDetail(id) {
+      showSection('product-details-section');
+      const detailContainer = document.getElementById('product-detail-card');
+      detailContainer.innerHTML = `<span class="loading loading-spinner text-primary mx-auto"></span>`;
 
-            setTimeout(() => {
-                clearInterval(testInterval);
-                document.getElementById('upVal').innerText = (fakeSpeed / 3).toFixed(1) + " Mbps";
-                startTestBtn.innerText = "TEST AGAIN";
-                startTestBtn.style.display = "block";
-            }, 10000); // Test finishes in 10s, tracking continues in background forever
+      onValue(ref(db, `products/${id}`), (snap) => {
+        const prod = snap.val();
+        if (prod) {
+          detailContainer.innerHTML = `
+            <div>
+              <img src="${prod.images ? prod.images[0] : 'https://placehold.co/400'}" class="w-full rounded-2xl h-80 object-cover" />
+            </div>
+            <div class="space-y-4">
+              <h2 class="text-3xl font-extrabold text-white">${prod.name}</h2>
+              <p class="text-gray-400">${prod.description || ''}</p>
+              <div class="text-2xl font-bold text-purple-400">৳${prod.discountPrice || prod.price}</div>
+              <p class="text-sm">স্টক: ${prod.stock > 0 ? `${prod.stock}টি আছে` : 'স্টক আউট'}</p>
+              <button class="btn btn-primary w-full" onclick="addToCart('${prod.id}')">কার্টে যোগ করুন</button>
+            </div>
+          `;
+          loadProductReviews(id);
+        }
+      });
+    }
+
+    function loadProductReviews(productId) {
+      const reviewRef = ref(db, `reviews/${productId}`);
+      onValue(reviewRef, (snap) => {
+        const container = document.getElementById('product-reviews-list');
+        container.innerHTML = '';
+        const data = snap.val();
+        if (!data) {
+          container.innerHTML = `<p class="text-gray-500 text-sm">কোনো রিভিউ নেই। প্রথম রিভিউটি আপনি দিন!</p>`;
+          return;
+        }
+        Object.values(data).forEach(rev => {
+          if (!rev.approved) return;
+          let stars = '';
+          for (let i = 1; i <= 5; i++) {
+            stars += `<i class="fa-${i <= rev.rating ? 'solid' : 'regular'} fa-star text-orange-400 text-xs"></i>`;
+          }
+          container.innerHTML += `
+            <div class="p-4 rounded-xl bg-slate-800 space-y-2 text-white">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-sm text-purple-300">${rev.userName}</span>
+                <div class="flex gap-1">${stars}</div>
+              </div>
+              <p class="text-gray-300 text-xs">${rev.comment}</p>
+            </div>
+          `;
         });
-    </script>
+      });
+    }
+
+    document.getElementById('add-review-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!currentUser) return alert('রিভিউ দিতে দয়া করে আগে লগইন করুন!');
+      if (!currentDetailProductId) return;
+
+      const rating = document.querySelector('input[name="rating-star"]:checked').value;
+      const comment = document.getElementById('review-comment').value;
+
+      const newReviewRef = push(ref(db, `reviews/${currentDetailProductId}`));
+      set(newReviewRef, {
+        userName: currentUser.email ? currentUser.email.split('@')[0] : 'Guest',
+        rating: Number(rating),
+        comment,
+        approved: false
+      }).then(() => {
+        alert('আপনার রিভিউ পাঠানো হয়েছে। এডমিন অনুমোদনের পর এটি প্রদর্শিত হবে।');
+        document.getElementById('add-review-form').reset();
+      });
+    });
+
+    // Cart Logic
+    window.addToCart = function(productId) {
+      const item = productsList.find(p => p.id === productId);
+      if (item) {
+        const idx = cart.findIndex(c => c.id === productId);
+        if (idx > -1) {
+          cart[idx].qty++;
+        } else {
+          cart.push({ ...item, qty: 1 });
+        }
+        localStorage.setItem('sw_cart', JSON.stringify(cart));
+        updateCartBadge();
+        alert('কার্টে যোগ করা হয়েছে!');
+      }
+    };
+
+    function updateCartBadge() {
+      document.getElementById('cart-count').innerText = cart.reduce((s, i) => s + i.qty, 0);
+      document.getElementById('cart-total-items').innerText = `${cart.reduce((s, i) => s + i.qty, 0)}টি প্রোডাক্ট`;
+    }
+    updateCartBadge();
+
+    function renderCart() {
+      const container = document.getElementById('cart-items-list');
+      container.innerHTML = '';
+      if (cart.length === 0) {
+        container.innerHTML = `<p class="text-gray-400 text-center glassmorphism p-8 rounded-2xl">আপনার শপিং কার্ট খালি!</p>`;
+        return;
+      }
+      let subtotal = 0;
+      cart.forEach((item, index) => {
+        const price = item.discountPrice || item.price;
+        subtotal += price * item.qty;
+        container.innerHTML += `
+          <div class="flex flex-col md:flex-row items-center gap-4 glassmorphism p-4 rounded-2xl text-white">
+            <img src="${item.images ? item.images[0] : ''}" class="w-20 h-20 object-cover rounded-xl" />
+            <div class="flex-1">
+              <h4 class="font-bold">${item.name}</h4>
+              <p class="text-sm text-purple-400">৳${price}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="btn btn-xs btn-outline text-white" onclick="changeQty(${index}, -1)">-</button>
+              <span>${item.qty}</span>
+              <button class="btn btn-xs btn-outline text-white" onclick="changeQty(${index}, 1)">+</button>
+            </div>
+            <button class="btn btn-ghost btn-sm text-red-400" onclick="removeFromCart(${index})"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        `;
+      });
+      document.getElementById('cart-subtotal').innerText = `৳${subtotal}`;
+      const discount = currentCoupon ? (subtotal * currentCoupon.discount) / 100 : 0;
+      const total = subtotal + 80 - discount;
+      document.getElementById('cart-grandtotal').innerText = `৳${total}`;
+    }
+
+    window.changeQty = function(index, amount) {
+      cart[index].qty += amount;
+      if (cart[index].qty < 1) cart[index].qty = 1;
+      localStorage.setItem('sw_cart', JSON.stringify(cart));
+      updateCartBadge();
+      renderCart();
+    };
+
+    window.removeFromCart = function(index) {
+      cart.splice(index, 1);
+      localStorage.setItem('sw_cart', JSON.stringify(cart));
+      updateCartBadge();
+      renderCart();
+    };
+
+    window.applyCoupon = function() {
+      const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+      if (!code) return;
+      onValue(ref(db, `coupons/${code}`), (snap) => {
+        const cp = snap.val();
+        if (cp) {
+          const today = new Date().toISOString().split('T')[0];
+          if (today <= cp.expiry) {
+            currentCoupon = cp;
+            alert(`কুপন সফল! ${cp.discount}% ডিসকাউন্ট প্রযোজ্য হয়েছে।`);
+            renderCart();
+          } else {
+            alert('কুপনটির মেয়াদ শেষ!');
+          }
+        } else {
+          alert('ভুল কুপন কোড!');
+        }
+      }, { onlyOnce: true });
+    };
+
+    // Checkout Handling
+    document.getElementById('checkout-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        alert('অর্ডার করতে দয়া করে আগে লগইন করুন।');
+        window.location.hash = '#account';
+        return;
+      }
+      if (cart.length === 0) return alert('কার্ট খালি!');
+
+      const orderId = 'ORD-' + Date.now();
+      const subtotal = cart.reduce((sum, item) => sum + (item.discountPrice || item.price) * item.qty, 0);
+      const discount = currentCoupon ? (subtotal * currentCoupon.discount) / 100 : 0;
+      const total = subtotal + 80 - discount;
+
+      const orderData = {
+        orderId,
+        userId: currentUser.uid,
+        name: document.getElementById('ship-name').value,
+        phone: document.getElementById('ship-phone').value,
+        address: document.getElementById('ship-address').value,
+        payment: document.getElementById('payment-method').value,
+        items: cart,
+        total,
+        status: 'pending',
+        createdAt: Date.now()
+      };
+
+      set(ref(db, `orders/${orderId}`), orderData)
+        .then(() => {
+          alert('অর্ডার সফলভাবে সম্পন্ন হয়েছে!');
+          cart = [];
+          localStorage.setItem('sw_cart', JSON.stringify([]));
+          updateCartBadge();
+          window.location.hash = '#home';
+        })
+        .catch(err => alert('অর্ডার ব্যর্থ হয়েছে: ' + err.message));
+    });
+
+    // Chat Messenger Widget Controller
+    const chatToggleBtn = document.getElementById('chat-toggle-btn');
+    const chatWindow = document.getElementById('chat-window');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const chatSendBtn = document.getElementById('chat-send-btn');
+
+    chatToggleBtn.addEventListener('click', () => {
+      chatWindow.classList.toggle('hidden');
+    });
+    document.getElementById('close-chat').addEventListener('click', () => chatWindow.classList.add('hidden'));
+
+    function initChat() {
+      if (!currentUser) return;
+      const chatRef = ref(db, `chats/chat_${currentUser.uid}/messages`);
+      const metaRef = ref(db, `chats/chat_${currentUser.uid}/meta`);
+
+      set(metaRef, {
+        userId: currentUser.uid,
+        userName: currentUser.email || 'Google Guest',
+        userOnline: true
+      });
+
+      onValue(chatRef, (snap) => {
+        chatMessages.innerHTML = '';
+        const data = snap.val();
+        if (data) {
+          Object.values(data).forEach(msg => {
+            const isUser = msg.sender === 'user';
+            chatMessages.innerHTML += `
+              <div class="chat ${isUser ? 'chat-end' : 'chat-start'}">
+                <div class="chat-bubble ${isUser ? 'chat-bubble-primary bg-purple-600' : 'bg-slate-800'} text-white text-xs">
+                  ${msg.text}
+                </div>
+              </div>
+            `;
+          });
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      });
+
+      const sendMsg = () => {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        const newMsgRef = push(ref(db, `chats/chat_${currentUser.uid}/messages`));
+        set(newMsgRef, {
+          sender: 'user',
+          text,
+          timestamp: Date.now()
+        });
+        update(metaRef, {
+          lastMessage: text,
+          unreadByAdmin: true
+        });
+        chatInput.value = '';
+      };
+
+      chatSendBtn.onclick = sendMsg;
+      chatInput.onkeypress = (e) => { if(e.key === 'Enter') sendMsg(); };
+    }
+
+  </script>
 </body>
 </html>
